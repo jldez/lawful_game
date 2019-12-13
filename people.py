@@ -10,7 +10,7 @@ class Population(object):
     def __init__(self, n_start:int=1):
         self.persons = [Person(self) for n in range(n_start)]
         for p in self:
-            p.age = random.choice(range(80))
+            p.age = random.choice(range(20,80))
         self.set_mortality_rates()
         self.set_natality_rate()
 
@@ -23,7 +23,7 @@ class Population(object):
         self.mortality_rates = func/np.max(func)
 
     def set_natality_rate(self):
-        self.natality_rate = 0.2
+        self.natality_rate = 0.3
 
     @property
     def singles(self):
@@ -44,6 +44,11 @@ class Population(object):
                 families.append(p.family)
         return set(families)
 
+    @property
+    def mean_age(self):
+        ages = [p.age for p in self]
+        return sum(ages)/len(ages) if len(ages)>0 else 0
+
     def __len__(self):
         return len(self.persons)
 
@@ -58,7 +63,7 @@ class Family(object):
         self.father = father
         self.mother = mother
         self.kids = []
-        self.number_of_desired_kids = int(random.gauss(2,1))
+        self.number_of_desired_kids = int(random.gauss(2.5,1.5))
 
     def update(self):
         if self.father is not None and self.mother is not None:
