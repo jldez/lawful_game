@@ -7,14 +7,16 @@ import numpy as np
 class Run(object):
     def __init__(self):
 
-        self.fig = plt.figure('Lawful Game')
+        self.fig = plt.figure('Lawful Game', figsize=(12,8))
 
         self.population = people.Population(50)
         self.time = [0]
         
         self.stats_ax = self.fig.add_subplot(211)
-        self.stats_bars = self.stats_ax.bar(self.population.stats_names, self.stats_values)
+        self.stats_colors = [f'C{i}' for i in range(len(self.population.stats))]
+        self.stats_bars = self.stats_ax.bar(self.population.stats_names, self.stats_values, color=self.stats_colors)
         self.stats_ax.get_yaxis().set_visible(False)
+        self.stats_ax.set(frame_on=False)
         self.max_stats = 100
         self.stats_ax.set_ylim(0,self.max_stats)
 
@@ -22,7 +24,7 @@ class Run(object):
         self.track_stats = {name:[self.population.stats[name]] for name in self.population.stats_names}
         self.tracking_name = list(self.track_stats.keys())[0]
         self.track_ax.set_ylabel(self.tracking_name)
-        self.track_line, = self.track_ax.plot(self.time, self.track_stats[self.tracking_name])
+        self.track_line, = self.track_ax.plot(self.time, self.track_stats[self.tracking_name], color=self.stats_colors[0])
 
         self.update_plots()
         self.run()
@@ -53,8 +55,9 @@ class Run(object):
         if event.key in ['right','left']: #Tracking
             track_index = list(self.track_stats.keys()).index(self.tracking_name)
             track_index = track_index+1 if event.key == 'right' else track_index-1
-            track_index = 0 if track_index >= len(self.track_stats) else track_index
+            track_index = np.clip(track_index, 0, len(self.track_stats)-1)
             self.tracking_name = list(self.track_stats.keys())[track_index]
+            self.track_line.set_color(f'C{track_index}')
 
         self.update_plots()
 
