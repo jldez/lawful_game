@@ -10,22 +10,19 @@ class Run(object):
         self.fig = plt.figure('Lawful Game')
 
         self.population = people.Population(50)
-
+        self.time = [0]
+        
         self.stats_ax = self.fig.add_subplot(211)
-        self.stats_names = ['Population','Mean age']
-        self.stats = [len(self.population), self.population.mean_age]
-        self.stats_bars = self.stats_ax.bar(self.stats_names, self.stats)
+        self.stats_bars = self.stats_ax.bar(self.population.stats_names, self.stats_values)
         self.stats_ax.get_yaxis().set_visible(False)
         self.max_stats = 100
         self.stats_ax.set_ylim(0,self.max_stats)
 
         self.track_ax = self.fig.add_subplot(212)
-        self.time = [0]
-        self.track_population = [len(self.population)]
-        self.track_mean_age = [self.population.mean_age]
-        self.track_ax.set_ylabel('Population')
-        self.tracking = self.track_population
-        self.track_line, = self.track_ax.plot(self.time,self.track_population)
+        self.track_stats = {name:[self.population.stats[name]] for name in self.population.stats_names}
+        self.tracking_name = list(self.track_stats.keys())[0]
+        self.track_ax.set_ylabel(self.tracking_name)
+        self.track_line, = self.track_ax.plot(self.time, self.track_stats[self.tracking_name])
 
         self.update_plots()
         self.run()
@@ -34,6 +31,11 @@ class Run(object):
     def run(self):
         self.fig.canvas.mpl_connect('key_press_event', self.update)
         plt.show()
+
+    
+    @property
+    def stats_values(self):
+        return [self.population.stats[name] for name in self.population.stats]
 
 
     def update(self, event):
@@ -44,16 +46,15 @@ class Run(object):
 
         if event.key in [' ']: #update
             self.population.update()
-            self.track_population.append(len(self.population))
-            self.time.append(len(self.track_population))
-            self.track_mean_age.append(self.population.mean_age)
+            self.time.append(len(self.time))
+            for name in self.population.stats_names:
+                self.track_stats[name].append(self.population.stats[name])
 
-        if event.key == 'p': #population graph
-            self.tracking = self.track_population
-            self.track_ax.set_ylabel('Population')
-        if event.key == 'a': #aging graph
-            self.tracking = self.track_mean_age
-            self.track_ax.set_ylabel('Mean age')
+        if event.key in ['right','left']: #Tracking
+            track_index = list(self.track_stats.keys()).index(self.tracking_name)
+            track_index = track_index+1 if event.key == 'right' else track_index-1
+            track_index = 0 if track_index >= len(self.track_stats) else track_index
+            self.tracking_name = list(self.track_stats.keys())[track_index]
 
         self.update_plots()
 
@@ -63,18 +64,19 @@ class Run(object):
         while len(self.stats_ax.texts) > 0:
             [txt.remove() for txt in self.stats_ax.texts]
 
-        self.stats = [self.track_population[-1], self.track_mean_age[-1]]
         i=0
-        for bar, h in zip(self.stats_bars, self.stats):
+        for bar, h in zip(self.stats_bars, self.stats_values):
             bar.set_height(self.rescale_bar_height(h))
-            self.stats_ax.text(i-0.17,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
+            self.stats_ax.text(i-0.4,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
             i+=1
 
         max_length = 100
-        self.track_line.set_data(self.time[-max_length:],self.tracking[-max_length:])
-        if max(self.tracking[-max_length:]) > min(self.tracking[-max_length:]):
+        data = self.track_stats[self.tracking_name]
+        self.track_line.set_data(self.time[-max_length:],data[-max_length:])
+        self.track_ax.set_ylabel(self.tracking_name)
+        if max(data[-max_length:]) > min(data[-max_length:]):
             self.track_ax.set_xlim(min(self.time[-max_length:]),max(self.time[-max_length:]))
-            self.track_ax.set_ylim(min(self.tracking[-max_length:]),max(self.tracking[-max_length:]))
+            self.track_ax.set_ylim(min(data[-max_length:]),max(data[-max_length:]))
         plt.draw()
 
 
@@ -85,7 +87,6 @@ class Run(object):
         else:
             h = self.max_stats*transition_frac + np.log(h-self.max_stats*transition_frac)
             return h if h <= self.max_stats else self.max_stats
-            
     
 
 
