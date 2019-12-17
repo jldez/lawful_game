@@ -9,7 +9,7 @@ class Run(object):
 
         self.fig = plt.figure('Lawful Game', figsize=(12,8))
 
-        self.population = people.Population(50)
+        self.population = people.Population(70)
         self.time = [0]
         
         self.stats_ax = self.fig.add_subplot(211)
@@ -18,7 +18,7 @@ class Run(object):
         self.stats_ax.get_yaxis().set_visible(False)
         self.stats_ax.set(frame_on=False)
         self.max_stats = 100
-        self.stats_ax.set_ylim(0,self.max_stats)
+        self.stats_ax.set_ylim(0, self.max_stats)
 
         self.track_ax = self.fig.add_subplot(212)
         self.track_stats = {name:[self.population.stats[name]] for name in self.population.stats_names}

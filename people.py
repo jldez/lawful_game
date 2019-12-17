@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import jobs
 
 MAJORITY_AGE = 18
 
@@ -13,7 +14,7 @@ class Population(object):
             p.age = random.choice(range(20,80))
         self.set_mortality_rates()
         self.set_natality_rate()
-        self.stats_names = ['Population','Mean age','Single males','Single females','Couples','Kids']
+        self.stats_names = ['Population','Mean age','Single males','Single females','Couples','Kids','Mean money']
         self.update_status()
 
     def update(self):
@@ -29,6 +30,7 @@ class Population(object):
         for p in self:
             self.stats['Population'] += 1
             self.stats['Mean age'] += p.age
+            self.stats['Mean money'] += p.money
             if p.couple is None and p.sex == 1 and p.age >= MAJORITY_AGE:
                 self.stats['Single males'] += 1
                 self.single_males.append(p)
@@ -43,8 +45,10 @@ class Population(object):
                 self.kids.append(p)
         try:
             self.stats['Mean age'] /= self.stats['Population']
+            self.stats['Mean money'] /= self.stats['Population']
         except:
             self.stats['Mean age'] = 0
+            self.stats['Mean money'] = 0
 
         # print(self.stats['Population'] - (self.stats['Single males']+self.stats['Single females']+2*self.stats['Couples']+self.stats['Kids']))
 
@@ -114,6 +118,9 @@ class Person(object):
         self.sex_appeal = int(np.clip(random.gauss(50,20),0,100))
         self.couple = None
         self.number_of_desired_kids = int(np.round(random.gauss(3,1.5)))
+        self.job = None
+        self.money = 0
+        self.education = {}
 
     def update(self):
 
@@ -126,6 +133,11 @@ class Person(object):
                 self.couple.update()
             else: 
                 self.match()
+
+        if self.job is not None:
+            self.job.update()
+        if self.age == 5:
+            self.job = jobs.Student(person=self)
 
         self.age += 1
 
