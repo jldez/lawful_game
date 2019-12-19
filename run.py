@@ -1,4 +1,5 @@
 import people
+import jobs
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,7 +13,7 @@ class Run(object):
         self.population = people.Population(70)
         self.time = [0]
         
-        self.stats_ax = self.fig.add_subplot(211)
+        self.stats_ax = self.fig.add_subplot(311)
         self.stats_colors = [f'C{i}' for i in range(len(self.population.stats))]
         self.stats_bars = self.stats_ax.bar(self.population.stats_names, self.stats_values, color=self.stats_colors)
         self.stats_ax.get_yaxis().set_visible(False)
@@ -20,7 +21,14 @@ class Run(object):
         self.max_stats = 100
         self.stats_ax.set_ylim(0, self.max_stats)
 
-        self.track_ax = self.fig.add_subplot(212)
+        self.jobs_ax = self.fig.add_subplot(312)
+        self.jobs_colors = [f'C{i}' for i in range(len(jobs.JOBS)+1)]
+        self.jobs_bars = self.jobs_ax.bar(list(jobs.JOBS.keys())+['student'], self.job_stats, color=self.jobs_colors)
+        self.jobs_ax.get_yaxis().set_visible(False)
+        self.jobs_ax.set(frame_on=False)
+        self.jobs_ax.set_ylim(0, self.max_stats)
+
+        self.track_ax = self.fig.add_subplot(313)
         self.track_stats = {name:[self.population.stats[name]] for name in self.population.stats_names}
         self.tracking_name = list(self.track_stats.keys())[0]
         self.track_ax.set_ylabel(self.tracking_name)
@@ -38,7 +46,9 @@ class Run(object):
     @property
     def stats_values(self):
         return [self.population.stats[name] for name in self.population.stats]
-
+    @property
+    def job_stats(self):
+        return [self.population.job_stats[name] for name in self.population.job_stats]
 
     def update(self, event):
 
@@ -66,11 +76,19 @@ class Run(object):
 
         while len(self.stats_ax.texts) > 0:
             [txt.remove() for txt in self.stats_ax.texts]
+        while len(self.jobs_ax.texts) > 0:
+            [txt.remove() for txt in self.jobs_ax.texts]
 
         i=0
         for bar, h in zip(self.stats_bars, self.stats_values):
             bar.set_height(self.rescale_bar_height(h))
             self.stats_ax.text(i-0.4,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
+            i+=1
+
+        i=0
+        for bar, h in zip(self.jobs_bars, self.job_stats):
+            bar.set_height(self.rescale_bar_height(h))
+            self.jobs_ax.text(i-0.4,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
             i+=1
 
         max_length = 100
