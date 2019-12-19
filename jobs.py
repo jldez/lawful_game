@@ -12,6 +12,7 @@ class Job(object):
     def update(self):
         self.years_completed += 1
         self.person.money += self.salary
+        self.salary *= 1.02
 
     def check_for_promotion(self, promotion):
         if self.person.population.job_stats[promotion] < JOBS[promotion]['proportion']*len(self.person.population):
