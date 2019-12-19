@@ -32,6 +32,7 @@ class Population(object):
         self.kids = []
         self.job_stats = {name:0 for name in jobs.JOBS}
         self.job_stats['student'] = 0
+        self.job_stats['unemployed'] = 0
         for p in self:
             self.stats['Population'] += 1
             self.stats['Mean age'] += p.age
@@ -50,6 +51,8 @@ class Population(object):
                 self.kids.append(p)
             if p.job is not None:
                 self.job_stats[p.job.name] += 1
+            elif p.age >= MAJORITY_AGE:
+                self.job_stats['unemployed'] += 1
         try:
             self.stats['Mean age'] /= self.stats['Population']
             self.stats['Mean money'] /= self.stats['Population']

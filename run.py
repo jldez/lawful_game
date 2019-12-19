@@ -23,7 +23,7 @@ class Run(object):
 
         self.jobs_ax = self.fig.add_subplot(312)
         self.jobs_colors = [f'C{i}' for i in range(len(jobs.JOBS)+1)]
-        self.jobs_bars = self.jobs_ax.bar(list(jobs.JOBS.keys())+['student'], self.job_stats, color=self.jobs_colors)
+        self.jobs_bars = self.jobs_ax.bar(list(jobs.JOBS.keys())+['student','unemployed'], self.job_stats, color=self.jobs_colors)
         self.jobs_ax.get_yaxis().set_visible(False)
         self.jobs_ax.set(frame_on=False)
         self.jobs_ax.set_ylim(0, self.max_stats)
