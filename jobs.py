@@ -14,11 +14,11 @@ class Job(object):
         self.person.money += self.salary
         self.salary *= 1.02
 
-    def check_for_promotion(self, promotion):
-        if self.person.population.job_stats[promotion] < JOBS[promotion]['proportion']*len(self.person.population):
-            if is_qualified(self.person, JOBS[promotion]):
+    def check_for_promotion(self, promotion_name):
+        if self.person.population.job_stats[promotion_name] < JOBS[promotion_name]['proportion']*len(self.person.population):
+            if is_qualified(self.person, JOBS[promotion_name]):
                 self.person.population.job_stats[self.person.job.name] -= 1
-                self.person.job = JOBS[promotion]['class'](self.person)
+                self.person.job = JOBS[promotion_name]['class'](self.person)
                 self.person.population.job_stats[self.person.job.name] += 1
 
 
