@@ -32,11 +32,38 @@ class Secretary(Job):
         self.name = 'secretary'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
+class Journalist(Job):
+    def __init__(self, person):
+        self.name = 'journalist'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Journalist, self).update()
+        try: self.person.experience['communication'] += 1
+        except: self.person.experience['communication'] = 1
+
+class Scientist(Job):
+    def __init__(self, person):
+        self.name = 'scientist'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Scientist, self).update()
+        try: self.person.experience['science'] += 1
+        except: self.person.experience['science'] = 1
+        self.check_for_promotion('professor')
+
+class Professor(Job):
+    def __init__(self, person):
+        self.name = 'professor'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Professor, self).update()
+        try: self.person.experience['science'] += 1
+        except: self.person.experience['science'] = 1
+
 class Lawyer(Job):
     def __init__(self, person):
         self.name = 'lawyer'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    
     def update(self):
         super(Lawyer, self).update()
         try: self.person.experience['law'] += 1
@@ -47,7 +74,6 @@ class Judge(Job):
     def __init__(self, person):
         self.name = 'judge'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-
     def update(self):
         super(Judge, self).update()
         try: self.person.experience['law'] += 1
@@ -55,10 +81,13 @@ class Judge(Job):
 
 
 JOBS = {
-    'farmer':   {'class':Farmer,'requirements':None, 'base_salary':2e4, 'proportion':0.1},
-    'secretary':{'class':Secretary,'requirements':{'education':{'general':12}}, 'base_salary':3e4, 'proportion':0.1},
-    'lawyer':   {'class':Lawyer,'requirements':{'education':{'law':3}}, 'base_salary':1e5, 'proportion':0.01},
-    'judge':    {'class':Judge,'requirements':{'education':{'law':3},'experience':{'law':10}}, 'base_salary':3e5, 'proportion':0.001},
+    'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
+    'secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4, 'proportion':0.05},
+    'journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4, 'proportion':0.02},
+    'scientist':  {'class':Scientist, 'requirements':{'education':{'science':5}},                             'base_salary':6e4, 'proportion':0.03},
+    'professor':  {'class':Professor, 'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5, 'proportion':0.01},
+    'lawyer':     {'class':Lawyer,    'requirements':{'education':{'law':3}},                                 'base_salary':1e5, 'proportion':0.01},
+    'judge':      {'class':Judge,     'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':3e5, 'proportion':0.001},
 }
 
 
