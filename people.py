@@ -1,15 +1,17 @@
 import random
 import numpy as np
 import jobs
+import government
 
 MAJORITY_AGE = 18
-
+TAX_RATE = 0.3
 
 
 class Population(object):
 
     def __init__(self, n_start:int=1):
         self.persons = [Person(self) for n in range(n_start)]
+        self.government = government.Government(self)
         for p in self:
             p.age = random.choice(range(20,80))
         self.set_mortality_rates()
@@ -19,6 +21,7 @@ class Population(object):
 
     def update(self):
         [p.update() for p in self]
+        self.government.update()
         self.update_status()
 
     def update_status(self):
@@ -141,6 +144,10 @@ class Person(object):
 
         if self.job is not None:
             self.job.update()
+            try: 
+                self.money -= int(self.job.salary*TAX_RATE)
+                self.population.government.money += int(self.job.salary*TAX_RATE)
+            except: pass
         elif self.age == 5:
             self.job = jobs.Student(person=self)
         elif self.age >= 14:
