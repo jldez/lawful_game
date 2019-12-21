@@ -85,7 +85,7 @@ JOBS = {
     'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
     'secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4, 'proportion':0.05},
     'journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4, 'proportion':0.02},
-    'scientist':  {'class':Scientist, 'requirements':{'education':{'science':5}},                             'base_salary':6e4, 'proportion':0.03},
+    'scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4, 'proportion':0.03},
     'professor':  {'class':Professor, 'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5, 'proportion':0.01},
     'lawyer':     {'class':Lawyer,    'requirements':{'education':{'law':3}},                                 'base_salary':1e5, 'proportion':0.01},
     'judge':      {'class':Judge,     'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':3e5, 'proportion':0.001},
