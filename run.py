@@ -3,6 +3,8 @@ import jobs
 import matplotlib.pyplot as plt
 import numpy as np
 
+COLORMAP = plt.cm.rainbow
+COLORMAP_RANGE = (0.2,0.8)
 
 
 class Run(object):
@@ -10,11 +12,11 @@ class Run(object):
 
         self.fig = plt.figure('Lawful Game', figsize=(12,8))
 
-        self.population = people.Population(70)
+        self.population = people.Population(100)
         self.time = [0]
         
         self.stats_ax = self.fig.add_subplot(311)
-        self.stats_colors = [f'C{i}' for i in range(len(self.population.stats))]
+        self.stats_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(self.population.stats)))
         self.stats_bars = self.stats_ax.bar(self.population.stats_names, self.stats_values, color=self.stats_colors)
         self.stats_ax.get_yaxis().set_visible(False)
         self.stats_ax.set(frame_on=False)
@@ -22,7 +24,7 @@ class Run(object):
         self.stats_ax.set_ylim(0, self.max_stats)
 
         self.jobs_ax = self.fig.add_subplot(312)
-        self.jobs_colors = [f'C{i}' for i in range(len(jobs.JOBS)+1)]
+        self.jobs_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(jobs.JOBS)+2))
         self.jobs_bars = self.jobs_ax.bar(list(jobs.JOBS.keys())+['student','unemployed'], self.job_stats, color=self.jobs_colors)
         self.jobs_ax.get_yaxis().set_visible(False)
         self.jobs_ax.set(frame_on=False)
@@ -67,7 +69,7 @@ class Run(object):
             track_index = track_index+1 if event.key == 'right' else track_index-1
             track_index = np.clip(track_index, 0, len(self.track_stats)-1)
             self.tracking_name = list(self.track_stats.keys())[track_index]
-            self.track_line.set_color(f'C{track_index}')
+            self.track_line.set_color(self.stats_colors[track_index])
 
         self.update_plots()
 
