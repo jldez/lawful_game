@@ -27,6 +27,25 @@ class Farmer(Job):
     def __init__(self, person):
         self.name = 'farmer'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
+
+class Cook(Job):
+    def __init__(self, person):
+        self.name = 'cook'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Cook, self).update()
+        try: self.person.experience['cooking'] += 1
+        except: self.person.experience['cooking'] = 1
+        self.check_for_promotion('chef')
+
+class Chef(Job):
+    def __init__(self, person):
+        self.name = 'chef'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Chef, self).update()
+        try: self.person.experience['cooking'] += 1
+        except: self.person.experience['cooking'] = 1
     
 class Secretary(Job):
     def __init__(self, person):
@@ -83,6 +102,8 @@ class Judge(Job):
 
 JOBS = {
     'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
+    'cook':       {'class':Cook,      'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
+    'chef':       {'class':Chef,      'requirements':{'experience':{'cooking':10}},                           'base_salary':5e4, 'proportion':0.02},
     'secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4, 'proportion':0.05},
     'journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4, 'proportion':0.02},
     'scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4, 'proportion':0.03},
