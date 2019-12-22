@@ -33,6 +33,7 @@ class Population(object):
         self.job_stats = {name:0 for name in jobs.JOBS}
         self.job_stats['student'] = 0
         self.job_stats['unemployed'] = 0
+        self.positions = []
         for p in self:
             self.stats['Population'] += 1
             self.stats['Mean age'] += p.age
@@ -40,19 +41,27 @@ class Population(object):
             if p.couple is None and p.sex == 1 and p.age >= MAJORITY_AGE:
                 self.stats['Single males'] += 1
                 self.single_males.append(p)
+                p.status = 'single male'
             if p.couple is None and p.sex == 0 and p.age >= MAJORITY_AGE:
                 self.stats['Single females'] += 1
                 self.single_females.append(p)
-            if p.couple is not None and p.couple not in self.couples:
+                p.status = 'single female'
+            if p.couple is not None:
                 self.stats['Couples'] += 1
                 self.couples.append(p.couple)
+                p.status = 'married male' if p.sex==1 else 'married female'
             if p.age < MAJORITY_AGE:
                 self.stats['Kids'] += 1
                 self.kids.append(p)
+                p.status = 'male kid' if p.sex==1 else 'female kid'
             if p.job is not None:
                 self.job_stats[p.job.name] += 1
             elif p.age >= MAJORITY_AGE:
                 self.job_stats['unemployed'] += 1
+            self.positions.append(p.xy)
+        self.stats['Couples'] = int(self.stats['Couples']/2)
+        self.couples = set(self.couples)
+        self.positions = np.array(self.positions)
         try:
             self.stats['Mean age'] /= self.stats['Population']
             self.stats['Mean money'] /= self.stats['Population']
@@ -95,7 +104,7 @@ class Couple(object):
 
         self.love = np.clip(self.love + int(np.round(random.gauss(0,10))),0,100)
 
-        if int(np.round(random.gauss(20,5))) > self.love:
+        if int(np.round(random.gauss(20,3))) > self.love:
             self.break_up()
 
         nb_desired_kids = int(np.round((self.father.number_of_desired_kids + self.mother.number_of_desired_kids)/2))
@@ -106,6 +115,10 @@ class Couple(object):
                 self.mother.number_of_desired_kids -= 1
                 baby = Person(self.father.population)
                 self.father.population.persons.append(baby)
+                self.father.kids.append(baby)
+                self.mother.kids.append(baby)
+                baby.father = self.father
+                baby.mother = self.mother
 
         self.age += 1
 
@@ -132,6 +145,11 @@ class Person(object):
         self.money = 0
         self.education = {}
         self.experience = {}
+        self.xy = (random.random(), random.random())
+        self.status = None
+        self.father = None
+        self.mother = None
+        self.kids = []
 
     def update(self):
 
@@ -165,6 +183,16 @@ class Person(object):
                 self.couple.father.couple = None
             elif self.sex == 1:
                 self.couple.mother.couple = None
+
+        for parent in [self.father, self.mother]:
+            if parent is not None:
+                parent.kids.remove(self)
+
+        for kid in self.kids:
+            if self.sex==0:
+                kid.mother = None
+            elif self.sex==1:
+                kid.father = None
             
         self.population.persons.remove(self)
         del self

@@ -1,6 +1,7 @@
 import people
 import jobs
 import matplotlib.pyplot as plt
+from matplotlib.patches import *
 import numpy as np
 
 COLORMAP = plt.cm.rainbow
@@ -45,7 +46,7 @@ class Run(object):
         self.ax_people.get_xaxis().set_visible(False)
         self.ax_people.get_yaxis().set_visible(False)
 
-        self.people_scatter_data = self.ax_people.scatter(*self.get_people_scatter_data())
+        self.people_scatter_data = self.ax_people.scatter(self.population.positions[:,0],self.population.positions[:,1])
         self.person_annotation = self.ax_people.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                     bbox=dict(boxstyle="round", fc="w"),
                     arrowprops=dict(arrowstyle="->"))
@@ -117,10 +118,9 @@ class Run(object):
             self.track_ax.set_xlim(min(self.time[-max_length:]),max(self.time[-max_length:]))
             self.track_ax.set_ylim(min(data[-max_length:]),max(data[-max_length:]))
 
-        scatter_data = self.get_people_scatter_data()
-        self.people_scatter_data.set_offsets(np.vstack([scatter_data[0],scatter_data[1]]).T) #Nx2
-        self.people_scatter_data.set_sizes(scatter_data[2]) #sizes
-        self.people_scatter_data.set_array(scatter_data[3]) #colors
+        self.people_scatter_data.set_offsets(self.population.positions)
+        try: self.hover(self.last_hover)
+        except: pass
 
         plt.draw()
 
@@ -135,15 +135,29 @@ class Run(object):
 
 
     def update_annot(self, ind):
-        pos = self.people_scatter_data.get_offsets()[ind]
-        self.person_annotation.xy = pos
-        text = f'age: {self.population.persons[ind].age} \n'
-        text = text + f'{self.population.persons[ind].job.name} \n' if self.population.persons[ind].job is not None else text+'unemployed \n'
-        text += f'money: {self.population.persons[ind].money}'
+        self.person_annotation.xy = self.people_scatter_data.get_offsets()[ind]
+        p = self.population.persons[ind]
+        text = p.status + ' \n'
+        text += f'age: {p.age} \n'
+        text = text + f'{p.job.name} \n' if p.job is not None else text+'unemployed \n'
+        text += f'money: {int(p.money)}'
         self.person_annotation.set_text(text)
+
+        connections = []
+        for parent in [p.father, p.mother]:
+            if parent is not None:
+                connections.append(ConnectionPatch(p.xy, parent.xy, 'data', color='b'))
+        if p.couple is not None:
+            connections.append(ConnectionPatch(p.couple.father.xy, p.couple.mother.xy, 'data', color='r'))
+        if len(p.kids) > 0:
+            connections += [ConnectionPatch(p.xy, kid.xy, 'data', color='y') for kid in p.kids]
+        if len(connections) > 0:
+            [self.ax_people.add_patch(connection) for connection in connections]
         
 
     def hover(self, event):
+        while len(self.ax_people.patches) > 0:
+            [patch.remove() for patch in self.ax_people.patches]
         vis = self.person_annotation.get_visible()
         if event.inaxes == self.ax_people:
             cont, ind = self.people_scatter_data.contains(event)
@@ -155,20 +169,7 @@ class Run(object):
                 if vis:
                     self.person_annotation.set_visible(False)
                     self.fig.canvas.draw_idle()
-
-    
-    def get_people_scatter_data(self):
-
-        N = len(self.population)
-        
-        x = np.random.rand(N)
-        y = np.random.rand(N)
-
-        s = np.ones(N)*50
-        c = np.ones(N)
-
-        return x,y,s,c
-    
+        self.last_hover = event
 
 
 if __name__ == '__main__':
