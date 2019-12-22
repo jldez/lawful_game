@@ -94,7 +94,6 @@ class Couple(object):
         self.father = father
         self.mother = mother
         self.love = int(np.round(random.gauss(50,20)))
-        self.age = 0
 
     @property
     def kids(self):
@@ -119,8 +118,6 @@ class Couple(object):
                 self.mother.kids.append(baby)
                 baby.father = self.father
                 baby.mother = self.mother
-
-        self.age += 1
 
     def break_up(self):
         # print('break')
