@@ -28,7 +28,8 @@ class Run(object):
 
         self.jobs_ax = self.axs[1,0]#self.fig.add_subplot(312)
         self.jobs_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(jobs.JOBS)+2))
-        self.jobs_bars = self.jobs_ax.bar(list(jobs.JOBS.keys())+['student','unemployed'], self.job_stats, color=self.jobs_colors)
+        self.jobs_names = list(jobs.JOBS.keys())+['student','unemployed']
+        self.jobs_bars = self.jobs_ax.bar(self.jobs_names, self.job_stats, color=self.jobs_colors)
         self.jobs_ax.get_yaxis().set_visible(False)
         self.jobs_ax.set(frame_on=False)
         self.jobs_ax.set_ylim(0, self.max_stats)
@@ -51,6 +52,7 @@ class Run(object):
                     bbox=dict(boxstyle="round", fc="w"),
                     arrowprops=dict(arrowstyle="->"))
         self.person_annotation.set_visible(False)
+        self.people_highlight_data = self.ax_people.scatter([],[], marker='o', s=50, color='r')
 
         self.update_plots()
         self.run()
@@ -122,7 +124,7 @@ class Run(object):
         try: self.hover(self.last_hover)
         except: pass
 
-        plt.draw()
+        self.fig.canvas.draw_idle()
 
 
     def rescale_bar_height(self, h):
@@ -156,9 +158,12 @@ class Run(object):
         
 
     def hover(self, event):
+
         while len(self.ax_people.patches) > 0:
             [patch.remove() for patch in self.ax_people.patches]
+
         vis = self.person_annotation.get_visible()
+
         if event.inaxes == self.ax_people:
             cont, ind = self.people_scatter_data.contains(event)
             if cont:
@@ -169,6 +174,34 @@ class Run(object):
                 if vis:
                     self.person_annotation.set_visible(False)
                     self.fig.canvas.draw_idle()
+
+        bar_name = ''
+        if event.inaxes == self.stats_ax:
+            for i, bar in enumerate(self.stats_bars):
+                cont,_ = bar.contains(event)
+                if cont:
+                    bar_name = self.population.stats_names[i]
+        elif event.inaxes == self.jobs_ax:
+            for i, bar in enumerate(self.jobs_bars):
+                cont,_ = bar.contains(event)
+                if cont:
+                    bar_name = self.jobs_names[i]
+
+        highlight_positions = np.empty((1,2))
+        if bar_name == 'Single males':
+            highlight_positions = np.array([p.xy for p in self.population.single_males])
+        if bar_name == 'Single females':
+            highlight_positions = np.array([p.xy for p in self.population.single_females])
+        if bar_name == 'Couples':
+            highlight_positions = np.array([c.father.xy for c in self.population.couples]+[c.mother.xy for c in self.population.couples])
+        if bar_name == 'Kids':
+            highlight_positions = np.array([p.xy for p in self.population.kids])
+        #to do : highlight jobs
+
+        if event.inaxes in [self.stats_ax, self.jobs_ax]:
+            self.people_highlight_data.set_offsets(highlight_positions)
+            self.fig.canvas.draw_idle()
+
         self.last_hover = event
 
 
