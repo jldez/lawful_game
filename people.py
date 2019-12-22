@@ -153,10 +153,6 @@ class Person(object):
 
     def update(self):
 
-        if random.random() < self.population.mortality_rates[self.age]:
-            self.die()
-            return None
-
         if self.sex == 1 and (self.age >= MAJORITY_AGE):
             if self.couple is not None:
                 self.couple.update()
@@ -173,6 +169,10 @@ class Person(object):
             self.job = jobs.Student(person=self)
         elif self.age >= 14:
             self.job = jobs.find_job(self)
+
+        if random.random() < self.population.mortality_rates[self.age]:
+            self.die()
+            return None
 
         self.age += 1
 
@@ -198,7 +198,6 @@ class Person(object):
         del self
 
     def match(self):
-        self.population.update_status() #FIXME : inefficient to recalculate everything, but necessary to avoid matching with dead people
         candidates = self.population.single_females
         candidates = [c for c in candidates if (c.age >= self.age/2 + 7) and (self.age >= c.age/2 + 7) and (c.age >= MAJORITY_AGE)]
         if len(candidates) > 0:
