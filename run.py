@@ -109,7 +109,7 @@ class Run(object):
         i=0
         for bar, h in zip(self.jobs_bars, self.job_stats):
             bar.set_height(self.rescale_bar_height(h))
-            self.jobs_ax.text(i-0.4,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
+            self.jobs_ax.text(i-1,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
             i+=1
 
         max_length = 100
@@ -196,7 +196,10 @@ class Run(object):
             highlight_positions = np.array([c.father.xy for c in self.population.couples]+[c.mother.xy for c in self.population.couples])
         if bar_name == 'Kids':
             highlight_positions = np.array([p.xy for p in self.population.kids])
-        #to do : highlight jobs
+        if bar_name == 'unemployed':
+            highlight_positions = np.array([p.xy for p in self.population if p.job is None and p.age >= people.MAJORITY_AGE])
+        elif bar_name in self.jobs_names:
+            highlight_positions = np.array([p.xy for p in self.population if p.job is not None and p.job.name == bar_name])
 
         if event.inaxes in [self.stats_ax, self.jobs_ax]:
             self.people_highlight_data.set_offsets(highlight_positions)
