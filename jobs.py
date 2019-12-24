@@ -103,7 +103,7 @@ class Judge(Job):
 JOBS = {
     'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
     'cook':       {'class':Cook,      'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
-    'chef':       {'class':Chef,      'requirements':{'experience':{'cooking':10}},                           'base_salary':5e4, 'proportion':0.02},
+    'chef':       {'class':Chef,      'requirements':                          {'experience':{'cooking':10}}, 'base_salary':5e4, 'proportion':0.02},
     'secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4, 'proportion':0.05},
     'journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4, 'proportion':0.02},
     'scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4, 'proportion':0.03},
@@ -131,6 +131,7 @@ def find_job(person):
             if JOBS[name]['base_salary'] > best_salary:
                 best_salary = JOBS[name]['base_salary']
                 best_job = JOBS[name]['class']
+        person.population.job_stats[name] += 1
         return best_job(person)
     else:
         return None
