@@ -16,7 +16,8 @@ class Population(object):
             p.age = random.choice(range(20,80))
         self.set_mortality_rates()
         self.set_natality_rate()
-        self.stats_names = ['Population','Mean age','Single males','Single females','Couples','Kids','Mean money']
+        self.stats_names = ['Population','Mean age','Mean money','Single males','Single females','Couples','Kids']
+        self.food = n_start*5
         self.update_status()
 
     def update(self):
@@ -171,6 +172,7 @@ class Person(object):
             self.die()
             return None
 
+        self.population.food -= 1
         self.age += 1
 
     def die(self):

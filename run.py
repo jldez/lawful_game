@@ -8,17 +8,20 @@ COLORMAP = plt.cm.rainbow
 COLORMAP_RANGE = (0.2,0.8)
 
 
+#todo : kids are considered unemployed before going to school
+
 
 class Run(object):
     def __init__(self):
 
-        # self.fig = plt.figure('Lawful Game', figsize=(12,8))
         self.fig, self.axs = plt.subplots(figsize=(21,9), ncols=2, nrows=3)
 
         self.population = people.Population(200)
         self.time = [0]
+
+        self.resources_text = self.fig.text(0.03,0.93,'')
         
-        self.stats_ax = self.axs[0,0]#self.fig.add_subplot(311)
+        self.stats_ax = self.axs[0,0]
         self.stats_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(self.population.stats)))
         self.stats_bars = self.stats_ax.bar(self.population.stats_names, self.stats_values, color=self.stats_colors)
         self.stats_ax.get_yaxis().set_visible(False)
@@ -26,7 +29,7 @@ class Run(object):
         self.max_stats = 100
         self.stats_ax.set_ylim(0, self.max_stats)
 
-        self.jobs_ax = self.axs[1,0]#self.fig.add_subplot(312)
+        self.jobs_ax = self.axs[1,0]
         self.jobs_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(jobs.JOBS)+2))
         self.jobs_names = list(jobs.JOBS.keys())+['student','unemployed']
         self.jobs_bars = self.jobs_ax.bar(self.jobs_names, self.job_stats, color=self.jobs_colors)
@@ -34,7 +37,7 @@ class Run(object):
         self.jobs_ax.set(frame_on=False)
         self.jobs_ax.set_ylim(0, self.max_stats)
 
-        self.track_ax = self.axs[2,0]#self.fig.add_subplot(313)
+        self.track_ax = self.axs[2,0]
         self.track_stats = {name:[self.population.stats[name]] for name in self.population.stats_names}
         self.tracking_name = list(self.track_stats.keys())[0]
         self.track_ax.set_ylabel(self.tracking_name)
@@ -100,6 +103,8 @@ class Run(object):
 
 
     def update_plots(self):
+
+        self.resources_text.set_text(f'Money:{self.population.government.money} | Food:{self.population.food}')
 
         while len(self.stats_ax.texts) > 0:
             [txt.remove() for txt in self.stats_ax.texts]

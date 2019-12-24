@@ -29,6 +29,9 @@ class Farmer(Job):
     def __init__(self, person):
         self.name = 'farmer'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Farmer, self).update()
+        self.person.population.food += 10
 
 class Cook(Job):
     def __init__(self, person):
