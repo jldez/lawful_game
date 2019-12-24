@@ -59,6 +59,7 @@ class Run(object):
 
 
     def run(self):
+        self.updating = False
         self.fig.canvas.mpl_connect('key_press_event', self.update)
         self.fig.canvas.mpl_connect('motion_notify_event', self.hover)
         plt.show()
@@ -72,6 +73,10 @@ class Run(object):
         return [self.population.job_stats[name] for name in self.population.job_stats]
 
     def update(self, event):
+        if self.updating:
+            return 0
+
+        self.updating = True
 
         if event.key == 'r': #restart
             plt.clf()
@@ -91,6 +96,7 @@ class Run(object):
             self.track_line.set_color(self.stats_colors[track_index])
 
         self.update_plots()
+        self.updating = False
 
 
     def update_plots(self):
@@ -125,6 +131,7 @@ class Run(object):
         except: pass
 
         self.fig.canvas.draw_idle()
+        self.fig.canvas.flush_events()
 
 
     def rescale_bar_height(self, h):
