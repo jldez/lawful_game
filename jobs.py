@@ -1,6 +1,8 @@
 import random
 import numpy as np
 
+MINIMUM_WAGE = 2e4
+
 
 class Job(object):
 
@@ -80,6 +82,11 @@ class Professor(Job):
         try: self.person.experience['science'] += 1
         except: self.person.experience['science'] = 1
 
+class Teacher(Job):
+    def __init__(self, person):
+        self.name = 'teacher'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+
 class Lawyer(Job):
     def __init__(self, person):
         self.name = 'lawyer'
@@ -99,18 +106,66 @@ class Judge(Job):
         try: self.person.experience['law'] += 1
         except: self.person.experience['law'] = 1
 
+class Nurse(Job):
+    def __init__(self, person):
+        self.name = 'nurse'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Nurse, self).update()
+        try: self.person.experience['medecine'] += 1
+        except: self.person.experience['medecine'] = 1
+
+class Doctor(Job):
+    def __init__(self, person):
+        self.name = 'doctor'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Doctor, self).update()
+        try: self.person.experience['medecine'] += 1
+        except: self.person.experience['medecine'] = 1
+
+class Surgeon(Job):
+    def __init__(self, person):
+        self.name = 'surgeon'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Surgeon, self).update()
+        try: self.person.experience['medecine'] += 1
+        except: self.person.experience['medecine'] = 1
+
+class Architect(Job):
+    def __init__(self, person):
+        self.name = 'architect'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Architect, self).update()
+        try: self.person.experience['engineering'] += 1
+        except: self.person.experience['engineering'] = 1
+
+class Cashier(Job):
+    def __init__(self, person):
+        self.name = 'cashier'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+
 
 JOBS = {
-    'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
-    'cook':       {'class':Cook,      'requirements':None,                                                    'base_salary':2e4, 'proportion':0.1},
-    'chef':       {'class':Chef,      'requirements':                          {'experience':{'cooking':10}}, 'base_salary':5e4, 'proportion':0.02},
-    'secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4, 'proportion':0.05},
-    'journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4, 'proportion':0.02},
-    'scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4, 'proportion':0.03},
-    'professor':  {'class':Professor, 'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5, 'proportion':0.01},
-    'lawyer':     {'class':Lawyer,    'requirements':{'education':{'law':3}},                                 'base_salary':1e5, 'proportion':0.01},
-    'judge':      {'class':Judge,     'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':3e5, 'proportion':0.001},
+    'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'proportion':0.1},
+    'cook':       {'class':Cook,      'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'proportion':0.1},
+    'chef':       {'class':Chef,      'requirements':                          {'experience':{'cooking':10}}, 'base_salary':5e4,          'proportion':0.02},
+    'secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'proportion':0.05},
+    'journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4,          'proportion':0.02},
+    'scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4,          'proportion':0.03},
+    'professor':  {'class':Professor, 'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5,          'proportion':0.01},
+    'teacher':    {'class':Teacher,   'requirements':{'education':{'general':12}},                            'base_salary':5e4,          'proportion':0.07},
+    'lawyer':     {'class':Lawyer,    'requirements':{'education':{'law':3}},                                 'base_salary':1e5,          'proportion':0.01},
+    'judge':      {'class':Judge,     'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':3e5,          'proportion':0.001},
+    'nurse':      {'class':Nurse,     'requirements':{'education':{'medecine':3}},                            'base_salary':4e4,          'proportion':0.08},
+    'doctor':     {'class':Doctor,    'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'proportion':0.04},
+    'surgeon':    {'class':Surgeon,   'requirements':{'education':{'medecine':8}},                            'base_salary':3e5,          'proportion':0.02},
+    'architect':  {'class':Architect, 'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'proportion':0.03},
+    'cashier':    {'class':Cashier,   'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'proportion':0.05},
 }
+# print(sum([JOBS[n]['proportion'] for n in JOBS]))
 
 
 def find_job(person):
