@@ -22,6 +22,7 @@ class Population(object):
         self.update_status()
 
     def update(self):
+        random.shuffle(self.persons)
         [p.update() for p in self]
         self.government.update()
         self.update_status()
