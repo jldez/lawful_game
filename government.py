@@ -2,6 +2,7 @@
 
 
 SOCIAL_WELFARE = 1e4
+INTEREST_RATE = 0.03
 
 
 class Government(object):
