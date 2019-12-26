@@ -22,6 +22,8 @@ class Run(object):
         self.stats_ax = self.axs[0,0]
         self.stats_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(self.population.stats)))
         self.stats_bars = self.stats_ax.bar(self.population.stats_names, self.stats_values, color=self.stats_colors)
+        for tick in self.stats_ax.get_xticklabels():
+            tick.set_rotation(45)
         self.stats_ax.get_yaxis().set_visible(False)
         self.stats_ax.set(frame_on=False)
         self.max_stats = 100
@@ -31,6 +33,9 @@ class Run(object):
         self.jobs_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(jobs.JOBS)+2))
         self.jobs_names = list(jobs.JOBS.keys())+['student','unemployed']
         self.jobs_bars = self.jobs_ax.bar(self.jobs_names, self.job_stats, color=self.jobs_colors)
+        for tick in self.jobs_ax.get_xticklabels():
+            tick.set_rotation(45)
+        plt.subplots_adjust(hspace=0.5)
         self.jobs_ax.get_yaxis().set_visible(False)
         self.jobs_ax.set(frame_on=False)
         self.jobs_ax.set_ylim(0, self.max_stats)
