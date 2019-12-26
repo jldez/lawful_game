@@ -12,14 +12,17 @@ class Job(object):
         self.years_completed = 0
 
     def update(self):
-        self.years_completed += 1
         self.person.money += self.salary
-        self.salary *= 1.02
+        self.years_completed += 1
+
         if self.name is not 'student':
             #Check if too many workers on that job
             if self.person.population.job_stats[self.name] > np.floor(JOBS[self.name]['proportion']*len(self.person.population)):
                 self.person.population.job_stats[self.name] -= 1
                 self.person.job = None
+
+            else:
+                self.salary *= 1.02
 
     def check_for_promotion(self, promotion_name):
         if self.person.population.job_stats[promotion_name] < np.floor(JOBS[promotion_name]['proportion']*len(self.person.population)):

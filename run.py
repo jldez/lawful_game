@@ -8,8 +8,6 @@ COLORMAP = plt.cm.rainbow
 COLORMAP_RANGE = (0.2,0.8)
 
 
-#todo : kids are considered unemployed before going to school
-
 
 class Run(object):
     def __init__(self):

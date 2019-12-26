@@ -5,6 +5,7 @@ import government
 
 MAJORITY_AGE = 18
 TAX_RATE = 0.3
+NATALITY_RATE = 0.3
 
 
 class Population(object):
@@ -70,16 +71,11 @@ class Population(object):
             self.stats['Mean age'] = 0
             self.stats['Mean money'] = 0
 
-        # print(self.stats['Population'] - (self.stats['Single males']+self.stats['Single females']+2*self.stats['Couples']+self.stats['Kids']))
-
 
     def set_mortality_rates(self):
         ages = np.arange(100)
         func = np.exp(ages/10)
         self.mortality_rates = func/np.max(func)
-
-    def set_natality_rate(self):
-        self.natality_rate = 0.3
 
     def __len__(self):
         return len(self.persons)
@@ -109,8 +105,7 @@ class Couple(object):
 
         nb_desired_kids = int(np.round((self.father.number_of_desired_kids + self.mother.number_of_desired_kids)/2))
         if self.mother.age <= 55 and nb_desired_kids > 0:
-            if self.father.population.natality_rate > random.random():
-                # print('baby')
+            if NATALITY_RATE > random.random():
                 self.father.number_of_desired_kids -= 1
                 self.mother.number_of_desired_kids -= 1
                 baby = Person(self.father.population)
@@ -121,7 +116,6 @@ class Couple(object):
                 baby.mother = self.mother
 
     def break_up(self):
-        # print('break')
         self.father.couple = None
         self.mother.couple = None
         del self
@@ -176,7 +170,6 @@ class Person(object):
         self.age += 1
 
     def die(self):
-        # print('die')
         if self.couple is not None:
             if self.sex == 0:
                 self.couple.father.couple = None
@@ -202,7 +195,6 @@ class Person(object):
         if len(candidates) > 0:
             match = random.choice(candidates)
             if np.abs(self.sex_appeal-match.sex_appeal) < 20 and random.random()>0.8 and match.couple is None:
-                # print('match')
                 self.couple = Couple(father=self, mother=match)
                 match.couple = self.couple
                 
