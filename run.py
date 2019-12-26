@@ -221,7 +221,7 @@ class Run(object):
         if bar_name == 'Kids':
             highlight_positions = np.array([p.xy for p in self.population.kids])
         if bar_name == 'unemployed':
-            highlight_positions = np.array([p.xy for p in self.population if p.job is None and p.age >= people.MAJORITY_AGE])
+            highlight_positions = np.array([p.xy for p in self.population.unemployed])
         elif bar_name in self.jobs_names:
             highlight_positions = np.array([p.xy for p in self.population if p.job is not None and p.job.name == bar_name])
 
