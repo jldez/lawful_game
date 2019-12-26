@@ -117,13 +117,15 @@ class Run(object):
         i=0
         for bar, h in zip(self.stats_bars, self.stats_values):
             bar.set_height(self.rescale_bar_height(h))
-            self.stats_ax.text(i-0.4,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
+            self.stats_ax.text(bar.get_x() + bar.get_width()/2, self.rescale_bar_height(h), f'{int(h)}', ha='center', va='bottom')
             i+=1
 
         i=0
-        for bar, h in zip(self.jobs_bars, self.job_stats):
+        job_bar_heights = self.job_stats
+        job_bar_heights[:-2] = [int(100*self.population.job_stats[name]/(np.floor(jobs.JOBS[name]['proportion']*len(self.population))+1e-9)) for name in jobs.JOBS]
+        for bar, n, h in zip(self.jobs_bars, self.job_stats, job_bar_heights):
             bar.set_height(self.rescale_bar_height(h))
-            self.jobs_ax.text(i-1,self.rescale_bar_height(h),'{:10d}'.format(int(h)))
+            self.jobs_ax.text(bar.get_x() + bar.get_width()/2, self.rescale_bar_height(h), f'{int(n)}', ha='center', va='bottom')
             i+=1
 
         max_length = 100
