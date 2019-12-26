@@ -158,6 +158,25 @@ class Cashier(Job):
         self.name = 'cashier'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
+class Deputee(Job):
+    def __init__(self, person):
+        self.name = 'deputee'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        self.check_for_promotion('minister')
+        self.person.population.government.money -= self.salary
+        super(Deputee, self).update()
+        try: self.person.experience['politics'] += 1
+        except: self.person.experience['politics'] = 1
+
+class Minister(Job):
+    def __init__(self, person):
+        self.name = 'minister'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        self.person.population.government.money -= self.salary
+        super(Minister, self).update()
+
 
 JOBS = {
     'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'proportion':0.1},
@@ -175,6 +194,8 @@ JOBS = {
     'surgeon':    {'class':Surgeon,   'requirements':{'education':{'medecine':8}},                            'base_salary':3e5,          'proportion':0.02},
     'architect':  {'class':Architect, 'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'proportion':0.03},
     'cashier':    {'class':Cashier,   'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'proportion':0.05},
+    'deputee':    {'class':Deputee,   'requirements':None,                                                    'base_salary':8e4,          'proportion':0.01},
+    'minister':   {'class':Minister,  'requirements':{'experience':{'politics':12}},                          'base_salary':15e4,         'proportion':0.002},
 }
 # print(sum([JOBS[n]['proportion'] for n in JOBS]))
 
