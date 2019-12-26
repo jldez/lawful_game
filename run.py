@@ -107,7 +107,7 @@ class Run(object):
 
     def update_plots(self):
 
-        self.resources_text.set_text(f'Money:{self.population.government.money} | Food:{self.population.food}')
+        self.resources_text.set_text('Money:' + self.format_money(self.population.government.money) + f' | Food:{self.population.food}')
 
         while len(self.stats_ax.texts) > 0:
             [txt.remove() for txt in self.stats_ax.texts]
@@ -140,6 +140,15 @@ class Run(object):
 
         self.fig.canvas.draw_idle()
         self.fig.canvas.flush_events()
+
+    @staticmethod
+    def format_money(money):
+        if np.abs(money) >= 1e9:
+            return str(int(money/1e9))+'G'
+        elif np.abs(money) >= 1e6:
+            return str(int(money/1e6))+'M'
+        else:
+            return str(int(money))
 
 
     def rescale_bar_height(self, h):
