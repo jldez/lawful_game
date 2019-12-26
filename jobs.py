@@ -15,13 +15,18 @@ class Job(object):
         self.years_completed += 1
         self.person.money += self.salary
         self.salary *= 1.02
+        if self.name is not 'student':
+            #Check if too many workers on that job
+            if self.person.population.job_stats[self.name] > np.floor(JOBS[self.name]['proportion']*len(self.person.population)):
+                self.person.population.job_stats[self.name] -= 1
+                self.person.job = None
 
     def check_for_promotion(self, promotion_name):
-        if self.person.population.job_stats[promotion_name] < JOBS[promotion_name]['proportion']*len(self.person.population):
+        if self.person.population.job_stats[promotion_name] < np.floor(JOBS[promotion_name]['proportion']*len(self.person.population)):
             if is_qualified(self.person, JOBS[promotion_name]):
-                self.person.population.job_stats[self.person.job.name] -= 1
-                self.person.job = JOBS[promotion_name]['class'](self.person)
-                self.person.population.job_stats[self.person.job.name] += 1
+                self.person.population.job_stats[self.person.job.name] -= 1 #remove count from previous job
+                self.person.job = JOBS[promotion_name]['class'](self.person) #change to new job
+                self.person.population.job_stats[self.person.job.name] += 1 #add count to new job
 
 
 
@@ -38,11 +43,11 @@ class Cook(Job):
         self.name = 'cook'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
+        self.check_for_promotion('chef')
         super(Cook, self).update()
         try: self.person.experience['cooking'] += 1
         except: self.person.experience['cooking'] = 1
-        self.check_for_promotion('chef')
-
+        
 class Chef(Job):
     def __init__(self, person):
         self.name = 'chef'
@@ -71,10 +76,10 @@ class Scientist(Job):
         self.name = 'scientist'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
+        self.check_for_promotion('professor')
         super(Scientist, self).update()
         try: self.person.experience['science'] += 1
         except: self.person.experience['science'] = 1
-        self.check_for_promotion('professor')
 
 class Professor(Job):
     def __init__(self, person):
@@ -95,10 +100,10 @@ class Lawyer(Job):
         self.name = 'lawyer'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
+        self.check_for_promotion('judge')
         super(Lawyer, self).update()
         try: self.person.experience['law'] += 1
         except: self.person.experience['law'] = 1
-        self.check_for_promotion('judge')
 
 class Judge(Job):
     def __init__(self, person):
@@ -178,7 +183,7 @@ def find_job(person):
     total_population = len(person.population)
 
     for name in JOBS:
-        if person.population.job_stats[name] < JOBS[name]['proportion']*total_population:
+        if person.population.job_stats[name] < np.floor(JOBS[name]['proportion']*total_population):
 
             if is_qualified(person, JOBS[name]):
                 requirements_met.append(name)
