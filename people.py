@@ -5,6 +5,7 @@ import government
 
 MAJORITY_AGE = 18
 TAX_RATE = 0.3
+FOOD_PRICE = 5e3
 NATALITY_RATE = 0.3
 
 
@@ -16,7 +17,6 @@ class Population(object):
         for p in self:
             p.age = random.choice(range(20,80))
         self.set_mortality_rates()
-        self.set_natality_rate()
         self.stats_names = ['Population','Mean age','Mean money','Single males','Single females','Couples','Kids']
         self.food = n_start*5
         self.update_status()
@@ -166,8 +166,22 @@ class Person(object):
             self.die()
             return None
 
-        self.population.food -= 1
-        self.age += 1
+        if self.population.food > 0:
+            if self.age >= MAJORITY_AGE:
+                self.money -= FOOD_PRICE
+            else:
+                if self.father is not None:
+                    self.father.money -= FOOD_PRICE/2
+                else:
+                    self.population.government.money -= FOOD_PRICE/2
+                if self.mother is not None:
+                    self.mother.money -= FOOD_PRICE/2
+                else:
+                    self.population.government.money -= FOOD_PRICE/2
+            self.population.food -= 1
+            self.age += 1
+        else: 
+            self.die()
 
     def die(self):
         if self.couple is not None:
