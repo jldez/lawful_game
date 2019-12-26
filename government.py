@@ -1,5 +1,9 @@
 
 
+
+SOCIAL_WELFARE = 1e4
+
+
 class Government(object):
 
     def __init__(self, population):
@@ -7,4 +11,10 @@ class Government(object):
         self.money = 0
 
     def update(self):
-        pass
+
+        if self.money < 0:
+            self.money -= self.money*INTEREST_RATE
+        
+        for p in self.population.unemployed:
+            p.money += SOCIAL_WELFARE
+            self.money -= SOCIAL_WELFARE
