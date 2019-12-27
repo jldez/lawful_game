@@ -20,7 +20,7 @@ class Job(object):
             self.person.population.job_stats[self.name] -= 1
             self.person.job = None
 
-        elif self.name is not 'student':
+        elif self.name is not 'Student':
             #Check if too many workers on that job
             if self.person.population.job_stats[self.name] > np.floor(JOBS[self.name]['proportion']*len(self.person.population)):
                 self.person.population.job_stats[self.name] -= 1
@@ -40,7 +40,7 @@ class Job(object):
 
 class Farmer(Job):
     def __init__(self, person):
-        self.name = 'farmer'
+        self.name = 'Farmer'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Farmer, self).update()
@@ -48,17 +48,17 @@ class Farmer(Job):
 
 class Cook(Job):
     def __init__(self, person):
-        self.name = 'cook'
+        self.name = 'Cook'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
-        self.check_for_promotion('chef')
+        self.check_for_promotion('Chef')
         super(Cook, self).update()
         try: self.person.experience['cooking'] += 1
         except: self.person.experience['cooking'] = 1
         
 class Chef(Job):
     def __init__(self, person):
-        self.name = 'chef'
+        self.name = 'Chef'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Chef, self).update()
@@ -67,12 +67,12 @@ class Chef(Job):
     
 class Secretary(Job):
     def __init__(self, person):
-        self.name = 'secretary'
+        self.name = 'Secretary'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Journalist(Job):
     def __init__(self, person):
-        self.name = 'journalist'
+        self.name = 'Journalist'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Journalist, self).update()
@@ -81,17 +81,17 @@ class Journalist(Job):
 
 class Scientist(Job):
     def __init__(self, person):
-        self.name = 'scientist'
+        self.name = 'Scientist'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
-        self.check_for_promotion('professor')
+        self.check_for_promotion('Professor')
         super(Scientist, self).update()
         try: self.person.experience['science'] += 1
         except: self.person.experience['science'] = 1
 
 class Professor(Job):
     def __init__(self, person):
-        self.name = 'professor'
+        self.name = 'Professor'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Professor, self).update()
@@ -100,22 +100,22 @@ class Professor(Job):
 
 class Teacher(Job):
     def __init__(self, person):
-        self.name = 'teacher'
+        self.name = 'Teacher'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Lawyer(Job):
     def __init__(self, person):
-        self.name = 'lawyer'
+        self.name = 'Lawyer'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
-        self.check_for_promotion('judge')
+        self.check_for_promotion('Judge')
         super(Lawyer, self).update()
         try: self.person.experience['law'] += 1
         except: self.person.experience['law'] = 1
 
 class Judge(Job):
     def __init__(self, person):
-        self.name = 'judge'
+        self.name = 'Judge'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Judge, self).update()
@@ -124,7 +124,7 @@ class Judge(Job):
 
 class Nurse(Job):
     def __init__(self, person):
-        self.name = 'nurse'
+        self.name = 'Nurse'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Nurse, self).update()
@@ -133,7 +133,7 @@ class Nurse(Job):
 
 class Doctor(Job):
     def __init__(self, person):
-        self.name = 'doctor'
+        self.name = 'Doctor'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Doctor, self).update()
@@ -142,7 +142,7 @@ class Doctor(Job):
 
 class Surgeon(Job):
     def __init__(self, person):
-        self.name = 'surgeon'
+        self.name = 'Surgeon'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Surgeon, self).update()
@@ -151,7 +151,7 @@ class Surgeon(Job):
 
 class Architect(Job):
     def __init__(self, person):
-        self.name = 'architect'
+        self.name = 'Architect'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Architect, self).update()
@@ -160,15 +160,15 @@ class Architect(Job):
 
 class Cashier(Job):
     def __init__(self, person):
-        self.name = 'cashier'
+        self.name = 'Cashier'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Deputee(Job):
     def __init__(self, person):
-        self.name = 'deputee'
+        self.name = 'Deputee'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
-        self.check_for_promotion('minister')
+        self.check_for_promotion('Minister')
         self.person.population.government.money -= self.salary
         super(Deputee, self).update()
         try: self.person.experience['politics'] += 1
@@ -176,7 +176,7 @@ class Deputee(Job):
 
 class Minister(Job):
     def __init__(self, person):
-        self.name = 'minister'
+        self.name = 'Minister'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         self.person.population.government.money -= self.salary
@@ -184,23 +184,23 @@ class Minister(Job):
 
 
 JOBS = {
-    'farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':3e4,          'max_salary':3e4,              'proportion':0.1},
-    'cook':       {'class':Cook,      'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.1},
-    'chef':       {'class':Chef,      'requirements':                          {'experience':{'cooking':10}}, 'base_salary':5e4,          'max_salary':1e5,              'proportion':0.02},
-    'secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'max_salary':5e4,              'proportion':0.05},
-    'journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4,          'max_salary':7e4,              'proportion':0.02},
-    'scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4,          'max_salary':8e4,              'proportion':0.03},
-    'professor':  {'class':Professor, 'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
-    'teacher':    {'class':Teacher,   'requirements':{'education':{'general':12}},                            'base_salary':5e4,          'max_salary':7e4,              'proportion':0.07},
-    'lawyer':     {'class':Lawyer,    'requirements':{'education':{'law':3}},                                 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
-    'judge':      {'class':Judge,     'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':2e5,          'max_salary':3e5,              'proportion':0.001},
-    'nurse':      {'class':Nurse,     'requirements':{'education':{'medecine':3}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.08},
-    'doctor':     {'class':Doctor,    'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'max_salary':3e5,              'proportion':0.04},
-    'surgeon':    {'class':Surgeon,   'requirements':{'education':{'medecine':8}},                            'base_salary':3e5,          'max_salary':5e5,              'proportion':0.02},
-    'architect':  {'class':Architect, 'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.03},
-    'cashier':    {'class':Cashier,   'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
-    'deputee':    {'class':Deputee,   'requirements':None,                                                    'base_salary':8e4,          'max_salary':8e4,              'proportion':0.01},
-    'minister':   {'class':Minister,  'requirements':{'experience':{'politics':12}},                          'base_salary':15e4,         'max_salary':15e4,             'proportion':0.002},
+    'Farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':3e4,          'max_salary':3e4,              'proportion':0.1},
+    'Cook':       {'class':Cook,      'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.1},
+    'Chef':       {'class':Chef,      'requirements':                          {'experience':{'cooking':10}}, 'base_salary':5e4,          'max_salary':1e5,              'proportion':0.02},
+    'Secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'max_salary':5e4,              'proportion':0.05},
+    'Journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4,          'max_salary':7e4,              'proportion':0.02},
+    'Scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4,          'max_salary':8e4,              'proportion':0.03},
+    'Professor':  {'class':Professor, 'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
+    'Teacher':    {'class':Teacher,   'requirements':{'education':{'general':12}},                            'base_salary':5e4,          'max_salary':7e4,              'proportion':0.07},
+    'Lawyer':     {'class':Lawyer,    'requirements':{'education':{'law':3}},                                 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
+    'Judge':      {'class':Judge,     'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':2e5,          'max_salary':3e5,              'proportion':0.001},
+    'Nurse':      {'class':Nurse,     'requirements':{'education':{'medecine':3}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.08},
+    'Doctor':     {'class':Doctor,    'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'max_salary':3e5,              'proportion':0.04},
+    'Surgeon':    {'class':Surgeon,   'requirements':{'education':{'medecine':8}},                            'base_salary':3e5,          'max_salary':5e5,              'proportion':0.02},
+    'Architect':  {'class':Architect, 'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.03},
+    'Cashier':    {'class':Cashier,   'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
+    'Deputee':    {'class':Deputee,   'requirements':None,                                                    'base_salary':8e4,          'max_salary':8e4,              'proportion':0.01},
+    'Minister':   {'class':Minister,  'requirements':{'experience':{'politics':12}},                          'base_salary':15e4,         'max_salary':15e4,             'proportion':0.002},
 }
 # print(sum([JOBS[n]['proportion'] for n in JOBS]))
 
@@ -254,7 +254,7 @@ class Student(Job):
     def __init__(self, person, salary=0):
         super().__init__(person, salary)
         self.domain = 'general'
-        self.name = 'student'
+        self.name = 'Student'
 
     def update(self):
         super(Student, self).update()

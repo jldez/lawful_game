@@ -31,7 +31,7 @@ class Run(object):
 
         self.jobs_ax = self.axs[1,0]
         self.jobs_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(jobs.JOBS)+3))
-        self.jobs_names = list(jobs.JOBS.keys())+['student','unemployed','retired']
+        self.jobs_names = list(jobs.JOBS.keys())+['Student','Unemployed','Retired']
         self.jobs_bars = self.jobs_ax.bar(self.jobs_names, self.job_stats, color=self.jobs_colors)
         for tick in self.jobs_ax.get_xticklabels():
             tick.set_rotation(45)
@@ -226,9 +226,9 @@ class Run(object):
             highlight_positions = np.array([c.father.xy for c in self.population.couples]+[c.mother.xy for c in self.population.couples])
         if bar_name == 'Kids':
             highlight_positions = np.array([p.xy for p in self.population.kids])
-        if bar_name == 'unemployed':
+        if bar_name == 'Unemployed':
             highlight_positions = np.array([p.xy for p in self.population.unemployed])
-        if bar_name == 'retired':
+        if bar_name == 'Retired':
             highlight_positions = np.array([p.xy for p in self.population.retired])
         elif bar_name in self.jobs_names[:-2]:
             highlight_positions = np.array([p.xy for p in self.population if p.job is not None and p.job.name == bar_name])
