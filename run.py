@@ -167,10 +167,12 @@ class Run(object):
         p = self.population.persons[ind]
         text = p.status + ' \n'
         text += f'age: {p.age} \n'
-        text = text + f'{p.job.name} \n' if p.job is not None else text+'unemployed \n'
+        if p.job is not None:
+            text += f'{p.job.name} \n'
+            text += f'salary: {int(p.job.salary)} \n'
         text += f'money: {int(p.money)} \n'
         text += f'education: {p.education} \n'
-        text += f'experience: {p.experience} \n'
+        text += f'experience: {p.experience}'
         self.person_annotation.set_text(text)
 
         connections = []
