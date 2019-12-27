@@ -66,8 +66,10 @@ class Run(object):
 
     def run(self):
         self.updating = False
+        self.freeze_hover = None
         self.fig.canvas.mpl_connect('key_press_event', self.update)
         self.fig.canvas.mpl_connect('motion_notify_event', self.hover)
+        self.fig.canvas.mpl_connect('button_press_event', self.click)
         plt.show()
 
     
@@ -189,6 +191,10 @@ class Run(object):
 
     def hover(self, event):
 
+        self.last_hover = event
+        if self.freeze_hover is not None:
+            event = self.freeze_hover
+
         while len(self.ax_people.patches) > 0:
             [patch.remove() for patch in self.ax_people.patches]
 
@@ -199,11 +205,12 @@ class Run(object):
             if cont:
                 self.update_annot(ind['ind'][0])
                 self.person_annotation.set_visible(True)
-                self.fig.canvas.draw_idle()
             else:
                 if vis:
                     self.person_annotation.set_visible(False)
-                    self.fig.canvas.draw_idle()
+                    self.freeze_hover = None # Disable freeze if selected person dies
+        else:
+            self.person_annotation.set_visible(False)
 
         bar_name = ''
         if event.inaxes == self.stats_ax:
@@ -217,7 +224,7 @@ class Run(object):
                 if cont:
                     bar_name = self.jobs_names[i]
 
-        highlight_positions = np.empty((1,2))
+        highlight_positions = np.empty((0,2))
         if bar_name == 'Single males':
             highlight_positions = np.array([p.xy for p in self.population.single_males])
         if bar_name == 'Single females':
@@ -233,11 +240,19 @@ class Run(object):
         elif bar_name in self.jobs_names[:-2]:
             highlight_positions = np.array([p.xy for p in self.population if p.job is not None and p.job.name == bar_name])
 
-        if event.inaxes in [self.stats_ax, self.jobs_ax]:
-            self.people_highlight_data.set_offsets(highlight_positions)
-            self.fig.canvas.draw_idle()
+        self.people_highlight_data.set_offsets(highlight_positions)
+        self.fig.canvas.draw_idle()
 
-        self.last_hover = event
+        
+
+    def click(self, event):
+        if event.button == 1:
+            # Update hover highlights before freezing
+            self.freeze_hover = self.last_hover
+            self.hover(self.freeze_hover)
+        elif event.button == 3:
+            self.freeze_hover = None
+            self.hover(self.last_hover)
 
 
 if __name__ == '__main__':
