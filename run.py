@@ -147,10 +147,12 @@ class Run(object):
 
     @staticmethod
     def format_money(money):
-        if np.abs(money) >= 1e9:
+        if np.abs(money) >= 10e9:
             return str(int(money/1e9))+'G'
-        elif np.abs(money) >= 1e6:
+        elif np.abs(money) >= 10e6:
             return str(int(money/1e6))+'M'
+        elif np.abs(money) >= 10e3:
+            return str(int(money/1e3))+'k'
         else:
             return str(int(money))
 
