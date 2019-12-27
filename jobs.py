@@ -7,14 +7,18 @@ RETIREMENT_AGE = 65
 
 class Job(object):
 
-    def __init__(self, person, salary):
+    def __init__(self, person, salary, promotion_name=None):
         self.person = person
         self.salary = salary
         self.years_completed = 0
+        self.promotion_name = promotion_name
 
     def update(self):
         self.person.money += self.salary
-        self.years_completed += 1
+        self.add_experience()
+
+        if self.promotion_name is not None:
+            self.check_for_promotion()
 
         if self.person.age >= RETIREMENT_AGE:
             self.person.population.job_stats[self.name] -= 1
@@ -29,11 +33,17 @@ class Job(object):
             else:
                 self.salary = min(self.salary*1.02, JOBS[self.name]['max_salary'])
 
-    def check_for_promotion(self, promotion_name):
-        if self.person.population.job_stats[promotion_name] < np.floor(JOBS[promotion_name]['proportion']*len(self.person.population)):
-            if is_qualified(self.person, JOBS[promotion_name]):
+    def add_experience(self):
+        self.years_completed += 1
+        if self.name is not 'Student':
+            try: self.person.experience[self.domain] += 1
+            except: self.person.experience[self.domain] = 1
+
+    def check_for_promotion(self):
+        if self.person.population.job_stats[self.promotion_name] < np.floor(JOBS[self.promotion_name]['proportion']*len(self.person.population)):
+            if is_qualified(self.person, JOBS[self.promotion_name]):
                 self.person.population.job_stats[self.person.job.name] -= 1 #remove count from previous job
-                self.person.job = JOBS[promotion_name]['class'](self.person) #change to new job
+                self.person.job = JOBS[self.promotion_name]['class'](self.person) #change to new job
                 self.person.population.job_stats[self.person.job.name] += 1 #add count to new job
 
 
@@ -41,165 +51,126 @@ class Job(object):
 class Farmer(Job):
     def __init__(self, person):
         self.name = 'Farmer'
+        self.domain = 'farming'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Farmer, self).update()
-        self.person.population.food += 10
+        self.person.population.food += 10 + min(self.person.experience[self.domain],10)
 
 class Cook(Job):
-    def __init__(self, person):
+    def __init__(self, person, promotion_name='Chef'):
         self.name = 'Cook'
+        self.domain = 'cooking'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        self.check_for_promotion('Chef')
-        super(Cook, self).update()
-        try: self.person.experience['cooking'] += 1
-        except: self.person.experience['cooking'] = 1
         
 class Chef(Job):
     def __init__(self, person):
         self.name = 'Chef'
+        self.domain = 'cooking'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Chef, self).update()
-        try: self.person.experience['cooking'] += 1
-        except: self.person.experience['cooking'] = 1
     
 class Secretary(Job):
     def __init__(self, person):
         self.name = 'Secretary'
+        self.domain = 'bureaucracy'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Journalist(Job):
     def __init__(self, person):
         self.name = 'Journalist'
+        self.domain = 'journalism'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Journalist, self).update()
-        try: self.person.experience['communication'] += 1
-        except: self.person.experience['communication'] = 1
 
 class Scientist(Job):
-    def __init__(self, person):
+    def __init__(self, person, promotion_name='Professor'):
         self.name = 'Scientist'
+        self.domain = 'science'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        self.check_for_promotion('Professor')
-        super(Scientist, self).update()
-        try: self.person.experience['science'] += 1
-        except: self.person.experience['science'] = 1
 
 class Professor(Job):
     def __init__(self, person):
         self.name = 'Professor'
+        self.domain = 'science'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Professor, self).update()
-        try: self.person.experience['science'] += 1
-        except: self.person.experience['science'] = 1
 
 class Teacher(Job):
     def __init__(self, person):
         self.name = 'Teacher'
+        self.domain = 'teaching'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Lawyer(Job):
-    def __init__(self, person):
+    def __init__(self, person, promotion_name='Judge'):
         self.name = 'Lawyer'
+        self.domain = 'law'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        self.check_for_promotion('Judge')
-        super(Lawyer, self).update()
-        try: self.person.experience['law'] += 1
-        except: self.person.experience['law'] = 1
 
 class Judge(Job):
     def __init__(self, person):
         self.name = 'Judge'
+        self.domain = 'law'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Judge, self).update()
-        try: self.person.experience['law'] += 1
-        except: self.person.experience['law'] = 1
 
 class Nurse(Job):
     def __init__(self, person):
         self.name = 'Nurse'
+        self.domain = 'medecine'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Nurse, self).update()
-        try: self.person.experience['medecine'] += 1
-        except: self.person.experience['medecine'] = 1
 
 class Doctor(Job):
     def __init__(self, person):
         self.name = 'Doctor'
+        self.domain = 'medecine'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Doctor, self).update()
-        try: self.person.experience['medecine'] += 1
-        except: self.person.experience['medecine'] = 1
 
 class Surgeon(Job):
     def __init__(self, person):
         self.name = 'Surgeon'
+        self.domain = 'medecine'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Surgeon, self).update()
-        try: self.person.experience['medecine'] += 1
-        except: self.person.experience['medecine'] = 1
 
 class Architect(Job):
     def __init__(self, person):
         self.name = 'Architect'
+        self.domain = 'engineering'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Architect, self).update()
-        try: self.person.experience['engineering'] += 1
-        except: self.person.experience['engineering'] = 1
 
 class Cashier(Job):
     def __init__(self, person):
         self.name = 'Cashier'
+        self.domain = 'cashing'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Deputee(Job):
-    def __init__(self, person):
+    def __init__(self, person, promotion_name='Minister'):
         self.name = 'Deputee'
+        self.domain = 'politics'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
-        self.check_for_promotion('Minister')
         self.person.population.government.money -= self.salary
         super(Deputee, self).update()
-        try: self.person.experience['politics'] += 1
-        except: self.person.experience['politics'] = 1
 
 class Minister(Job):
     def __init__(self, person):
         self.name = 'Minister'
+        self.domain = 'politics'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         self.person.population.government.money -= self.salary
         super(Minister, self).update()
 
 class Salesman(Job):
-    def __init__(self, person):
+    def __init__(self, person, promotion_name='Businessman'):
         self.name = 'Salesman'
+        self.domain = 'finance'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        self.check_for_promotion('Businessman')
-        super(Salesman, self).update()
-        try: self.person.experience['finance'] += 1
-        except: self.person.experience['finance'] = 1
 
 class Businessman(Job):
     def __init__(self, person):
         self.name = 'Businessman'
+        self.domain = 'finance'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
-    def update(self):
-        super(Businessman, self).update()
-        try: self.person.experience['finance'] += 1
-        except: self.person.experience['finance'] = 1
+
 
 
 JOBS = {

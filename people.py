@@ -24,6 +24,7 @@ class Population(object):
     def update(self):
         random.shuffle(self.persons)
         [p.update() for p in self]
+        self.food -= int(self.food*0.2) #food decay
         self.government.update()
         self.update_status()
 
@@ -170,7 +171,7 @@ class Person(object):
             except: pass
         elif self.age == 5:
             self.job = jobs.Student(person=self)
-        elif self.age >= 14:
+        elif self.age >= 14 and self.age < jobs.RETIREMENT_AGE:
             self.job = jobs.find_job(self)
 
         if random.random() < self.population.mortality_rates[self.age]:
