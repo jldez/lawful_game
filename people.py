@@ -35,10 +35,12 @@ class Population(object):
         self.workers = {name:[] for name in jobs.JOBS}
         self.workers['student'] = []
         self.unemployed = []
+        self.retired = []
         self.kids = []
         self.job_stats = {name:0 for name in jobs.JOBS}
         self.job_stats['student'] = 0
         self.job_stats['unemployed'] = 0
+        self.job_stats['retired'] = 0
         self.positions = []
         for p in self:
             self.stats['Population'] += 1
@@ -63,9 +65,12 @@ class Population(object):
             if p.job is not None:
                 self.job_stats[p.job.name] += 1
                 self.workers[p.job.name].append(p)
-            elif p.age >= MAJORITY_AGE:
+            elif p.age >= MAJORITY_AGE and p.age < jobs.RETIREMENT_AGE:
                 self.job_stats['unemployed'] += 1
                 self.unemployed.append(p)
+            if p.age >= jobs.RETIREMENT_AGE:
+                self.job_stats['retired'] += 1
+                self.retired.append(p)
             self.positions.append(p.xy)
         self.stats['Couples'] = int(self.stats['Couples']/2)
         self.couples = set(self.couples)

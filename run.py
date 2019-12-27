@@ -30,8 +30,8 @@ class Run(object):
         self.stats_ax.set_ylim(0, self.max_stats)
 
         self.jobs_ax = self.axs[1,0]
-        self.jobs_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(jobs.JOBS)+2))
-        self.jobs_names = list(jobs.JOBS.keys())+['student','unemployed']
+        self.jobs_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(jobs.JOBS)+3))
+        self.jobs_names = list(jobs.JOBS.keys())+['student','unemployed','retired']
         self.jobs_bars = self.jobs_ax.bar(self.jobs_names, self.job_stats, color=self.jobs_colors)
         for tick in self.jobs_ax.get_xticklabels():
             tick.set_rotation(45)
@@ -122,7 +122,7 @@ class Run(object):
 
         i=0
         job_bar_heights = self.job_stats
-        job_bar_heights[:-2] = [int(100*self.population.job_stats[name]/(np.floor(jobs.JOBS[name]['proportion']*len(self.population))+1e-9)) for name in jobs.JOBS]
+        job_bar_heights[:-3] = [int(100*self.population.job_stats[name]/(np.floor(jobs.JOBS[name]['proportion']*len(self.population))+1e-9)) for name in jobs.JOBS]
         for bar, n, h in zip(self.jobs_bars, self.job_stats, job_bar_heights):
             bar.set_height(self.rescale_bar_height(h))
             self.jobs_ax.text(bar.get_x() + bar.get_width()/2, self.rescale_bar_height(h), f'{int(n)}', ha='center', va='bottom')
@@ -228,7 +228,9 @@ class Run(object):
             highlight_positions = np.array([p.xy for p in self.population.kids])
         if bar_name == 'unemployed':
             highlight_positions = np.array([p.xy for p in self.population.unemployed])
-        elif bar_name in self.jobs_names:
+        if bar_name == 'retired':
+            highlight_positions = np.array([p.xy for p in self.population.retired])
+        elif bar_name in self.jobs_names[:-2]:
             highlight_positions = np.array([p.xy for p in self.population if p.job is not None and p.job.name == bar_name])
 
         if event.inaxes in [self.stats_ax, self.jobs_ax]:

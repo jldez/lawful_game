@@ -2,6 +2,7 @@ import random
 import numpy as np
 
 MINIMUM_WAGE = 2e4
+RETIREMENT_AGE = 65
 
 
 class Job(object):
@@ -15,7 +16,11 @@ class Job(object):
         self.person.money += self.salary
         self.years_completed += 1
 
-        if self.name is not 'student':
+        if self.person.age >= RETIREMENT_AGE:
+            self.person.population.job_stats[self.name] -= 1
+            self.person.job = None
+
+        elif self.name is not 'student':
             #Check if too many workers on that job
             if self.person.population.job_stats[self.name] > np.floor(JOBS[self.name]['proportion']*len(self.person.population)):
                 self.person.population.job_stats[self.name] -= 1
