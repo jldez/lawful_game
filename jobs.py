@@ -182,25 +182,46 @@ class Minister(Job):
         self.person.population.government.money -= self.salary
         super(Minister, self).update()
 
+class Salesman(Job):
+    def __init__(self, person):
+        self.name = 'Salesman'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        self.check_for_promotion('Businessman')
+        super(Salesman, self).update()
+        try: self.person.experience['finance'] += 1
+        except: self.person.experience['finance'] = 1
+
+class Businessman(Job):
+    def __init__(self, person):
+        self.name = 'Businessman'
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Businessman, self).update()
+        try: self.person.experience['finance'] += 1
+        except: self.person.experience['finance'] = 1
+
 
 JOBS = {
-    'Farmer':     {'class':Farmer,    'requirements':None,                                                    'base_salary':3e4,          'max_salary':3e4,              'proportion':0.1},
-    'Cook':       {'class':Cook,      'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.1},
-    'Chef':       {'class':Chef,      'requirements':                          {'experience':{'cooking':10}}, 'base_salary':5e4,          'max_salary':1e5,              'proportion':0.02},
-    'Secretary':  {'class':Secretary, 'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'max_salary':5e4,              'proportion':0.05},
-    'Journalist': {'class':Journalist,'requirements':{'education':{'communication':3}},                       'base_salary':3e4,          'max_salary':7e4,              'proportion':0.02},
-    'Scientist':  {'class':Scientist, 'requirements':{'education':{'science':3}},                             'base_salary':6e4,          'max_salary':8e4,              'proportion':0.03},
-    'Professor':  {'class':Professor, 'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
-    'Teacher':    {'class':Teacher,   'requirements':{'education':{'general':12}},                            'base_salary':5e4,          'max_salary':7e4,              'proportion':0.07},
-    'Lawyer':     {'class':Lawyer,    'requirements':{'education':{'law':3}},                                 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
-    'Judge':      {'class':Judge,     'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':2e5,          'max_salary':3e5,              'proportion':0.001},
-    'Nurse':      {'class':Nurse,     'requirements':{'education':{'medecine':3}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.08},
-    'Doctor':     {'class':Doctor,    'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'max_salary':3e5,              'proportion':0.04},
-    'Surgeon':    {'class':Surgeon,   'requirements':{'education':{'medecine':8}},                            'base_salary':3e5,          'max_salary':5e5,              'proportion':0.02},
-    'Architect':  {'class':Architect, 'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.03},
-    'Cashier':    {'class':Cashier,   'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
-    'Deputee':    {'class':Deputee,   'requirements':None,                                                    'base_salary':8e4,          'max_salary':8e4,              'proportion':0.01},
-    'Minister':   {'class':Minister,  'requirements':{'experience':{'politics':12}},                          'base_salary':15e4,         'max_salary':15e4,             'proportion':0.002},
+    'Farmer':     {'class':Farmer,     'requirements':None,                                                    'base_salary':3e4,          'max_salary':3e4,              'proportion':0.1},
+    'Cook':       {'class':Cook,       'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.1},
+    'Chef':       {'class':Chef,       'requirements':                          {'experience':{'cooking':10}}, 'base_salary':5e4,          'max_salary':1e5,              'proportion':0.02},
+    'Secretary':  {'class':Secretary,  'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'max_salary':5e4,              'proportion':0.05},
+    'Journalist': {'class':Journalist, 'requirements':{'education':{'communication':3}},                       'base_salary':3e4,          'max_salary':7e4,              'proportion':0.02},
+    'Scientist':  {'class':Scientist,  'requirements':{'education':{'science':3}},                             'base_salary':6e4,          'max_salary':8e4,              'proportion':0.03},
+    'Professor':  {'class':Professor,  'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
+    'Teacher':    {'class':Teacher,    'requirements':{'education':{'general':12}},                            'base_salary':5e4,          'max_salary':7e4,              'proportion':0.07},
+    'Lawyer':     {'class':Lawyer,     'requirements':{'education':{'law':3}},                                 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
+    'Judge':      {'class':Judge,      'requirements':{'education':{'law':3},    'experience':{'law':10}},     'base_salary':2e5,          'max_salary':3e5,              'proportion':0.001},
+    'Nurse':      {'class':Nurse,      'requirements':{'education':{'medecine':3}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.08},
+    'Doctor':     {'class':Doctor,     'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'max_salary':3e5,              'proportion':0.04},
+    'Surgeon':    {'class':Surgeon,    'requirements':{'education':{'medecine':8}},                            'base_salary':3e5,          'max_salary':5e5,              'proportion':0.02},
+    'Architect':  {'class':Architect,  'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.03},
+    'Cashier':    {'class':Cashier,    'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
+    'Deputee':    {'class':Deputee,    'requirements':None,                                                    'base_salary':8e4,          'max_salary':8e4,              'proportion':0.01},
+    'Minister':   {'class':Minister,   'requirements':{'experience':{'politics':12}},                          'base_salary':15e4,         'max_salary':15e4,             'proportion':0.002},
+    'Salesman':   {'class':Salesman,   'requirements':{'education': {'finance':1}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.07},
+    'Businessman':{'class':Businessman,'requirements':{'education': {'finance':3}, 'experience':{'finance':5}},'base_salary':1e5,          'max_salary':5e5,              'proportion':0.03},
 }
 # print(sum([JOBS[n]['proportion'] for n in JOBS]))
 
