@@ -7,6 +7,8 @@ MAJORITY_AGE = 18
 TAX_RATE = 0.3
 FOOD_PRICE = 5e3
 NATALITY_RATE = 0.3
+LIFE_EXPECTANCY = 80
+MORTALITY_RATE = 0.1
 
 
 class Population(object):
@@ -16,7 +18,6 @@ class Population(object):
         self.government = government.Government(self)
         for p in self:
             p.age = random.choice(range(20,80))
-        self.set_mortality_rates()
         self.stats_names = ['Population','Mean age','Mean money','Single males','Single females','Couples','Kids']
         self.food = n_start*5
         self.update_status()
@@ -87,12 +88,6 @@ class Population(object):
         except:
             self.stats['Mean age'] = 0
             self.stats['Mean money'] = 0
-
-
-    def set_mortality_rates(self):
-        ages = np.arange(100)
-        func = np.exp(ages/10)
-        self.mortality_rates = func/np.max(func)
 
     def __len__(self):
         return len(self.persons)
@@ -186,7 +181,7 @@ class Person(object):
         elif self.age >= 14 and self.age < jobs.RETIREMENT_AGE:
             self.job = jobs.find_job(self)
 
-        if random.random() < self.population.mortality_rates[self.age]:
+        if random.random() < self.mortality_rate:
             self.die()
             return None
 
@@ -214,12 +209,21 @@ class Person(object):
     @property
     def color(self):
         if self.age < MAJORITY_AGE:
-            return [0.8,0.8,0.1]
+            return [0.8,0.8,0.1] #yellow
         else:
             if self.sex==0:
-                return [1,0.3,0.3]
+                return [1,0.3,0.3] #red
             elif self.sex == 1:
-                return [0.3,0.3,1]
+                return [0.3,0.3,1] #blue
+
+    @property
+    def mortality_rate(self):
+        # Exponential mortality rate. 
+        # At age = LIFE_EXPECTANCY, the mortality rate is MORTALITY_RATE 
+        # and at age = 100, the mortality rate is 1
+        c = np.log(MORTALITY_RATE)/(LIFE_EXPECTANCY-100)
+        return np.exp(c*(self.age-100))
+         
 
     def die(self):
         if self.couple is not None:
