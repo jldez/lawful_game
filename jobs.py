@@ -2,7 +2,6 @@ import random
 import numpy as np
 
 MINIMUM_WAGE = 2e4
-RETIREMENT_AGE = 65
 
 
 class Job(object):
@@ -20,7 +19,7 @@ class Job(object):
         if self.promotion_name is not None:
             self.check_for_promotion()
 
-        if self.person.age >= RETIREMENT_AGE:
+        if self.person.age >= self.person.population.government.retirement_age:
             self.person.population.job_stats[self.name] -= 1
             self.person.job = None
             self.person.history.append(f'Retired at {self.person.age}')

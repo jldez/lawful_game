@@ -5,7 +5,6 @@ import jobs
 import government
 
 MAJORITY_AGE = 18
-TAX_RATE = 0.3
 FOOD_PRICE = 5e3
 NATALITY_RATE = 0.3
 LIFE_EXPECTANCY = 80
@@ -70,10 +69,10 @@ class Population(object):
             if p.job is not None:
                 self.job_stats[p.job.name] += 1
                 self.workers[p.job.name].append(p)
-            elif p.age >= MAJORITY_AGE and p.age < jobs.RETIREMENT_AGE:
+            elif p.age >= MAJORITY_AGE and p.age < self.government.retirement_age:
                 self.job_stats['Unemployed'] += 1
                 self.unemployed.append(p)
-            if p.age >= jobs.RETIREMENT_AGE:
+            if p.age >= self.government.retirement_age:
                 self.job_stats['Retired'] += 1
                 self.retired.append(p)
             self.positions.append(p.xy)
@@ -111,6 +110,9 @@ class Couple(object):
     @property
     def kids(self):
         return list(set(self.father.kids + self.mother.kids))
+    @property 
+    def money(self):
+        return self.father.money + self.mother.money
 
     def update(self):
 
@@ -121,7 +123,7 @@ class Couple(object):
 
         nb_desired_kids = int(np.round((self.father.number_of_desired_kids + self.mother.number_of_desired_kids)/2))
         if self.mother.age <= 55 and nb_desired_kids > 0:
-            if NATALITY_RATE > random.random():
+            if NATALITY_RATE > random.random() and self.money > 0:
                 baby = Person(self.father.population)
                 baby.name = baby.name.split(' ')[0] + ' ' + self.father.name.split(' ')[1]
                 baby.father = self.father
@@ -176,12 +178,12 @@ class Person(object):
         if self.job is not None:
             self.job.update()
             try: 
-                self.money -= int(self.job.salary*TAX_RATE)
-                self.population.government.money += int(self.job.salary*TAX_RATE)
+                self.money -= self.job.salary*self.population.government.tax_rate
+                self.population.government.money += self.job.salary*self.population.government.tax_rate
             except: pass
         elif self.age == 5:
             self.job = jobs.Student(person=self)
-        elif self.age >= 14 and self.age < jobs.RETIREMENT_AGE:
+        elif self.age >= 14 and self.age < self.population.government.retirement_age:
             self.job = jobs.find_job(self)
 
         if random.random() < self.mortality_rate:

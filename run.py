@@ -20,10 +20,21 @@ class Run(object):
         self.time = [0]
 
         self.time_step = 1
-        self.time_step_slider = Slider(plt.axes([0.065, 0.95, 0.05, 0.02]), 'Time step ', 1, 100, valinit=1, valfmt='%3d', valstep=1, orientation='horizontal')
+        self.fig.text(0.03,0.96,'Time step')
+        self.time_step_slider = Slider(plt.axes([0.03, 0.935, 0.05, 0.02]), None, 1, 100, valinit=1, valfmt='%3d', valstep=1, orientation='horizontal')
         self.time_step_slider.on_changed(self.change_time_step)
 
         self.resources_text = self.fig.text(0.03,0.9,'')
+
+        self.fig.text(0.9,0.96,'Tax rate')
+        self.tax_rate_slider = Slider(plt.axes([0.9, 0.935, 0.05, 0.02]), None, 0, 1, valinit=self.population.government.tax_rate, valfmt='%1.2f', valstep=0.01, orientation='horizontal')
+        self.tax_rate_slider.on_changed(self.change_tax_rate)
+        self.fig.text(0.9,0.9,'Social welfare')
+        self.social_welfare_textbox = TextBox(plt.axes([0.9, 0.875, 0.05, 0.02]), None, initial='10000', color='.95', hovercolor='1')
+        self.social_welfare_textbox.on_submit(self.change_social_welfare)
+        self.fig.text(0.9,0.84,'Retirement age')
+        self.retirement_age_slider = Slider(plt.axes([0.9, 0.815, 0.05, 0.02]), None, 0, 100, valinit=self.population.government.retirement_age, valfmt='%3d', valstep=1, orientation='horizontal')
+        self.retirement_age_slider.on_changed(self.change_retirement_age)
         
         self.stats_ax = self.axs[0,0]
         self.stats_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(self.population.stats)))
@@ -272,17 +283,24 @@ class Run(object):
         
 
     def click(self, event):
-        if event.button == 1:
-            # Update hover highlights before freezing
-            self.freeze_hover = self.last_hover
-            self.hover(self.freeze_hover)
-        elif event.button == 3:
-            self.freeze_hover = None
-            self.hover(self.last_hover)
+        if event.inaxes in [self.stats_ax,self.jobs_ax,self.ax_people]:
+            if event.button == 1:
+                # Update hover highlights before freezing
+                self.freeze_hover = self.last_hover
+                self.hover(self.freeze_hover)
+            elif event.button == 3:
+                self.freeze_hover = None
+                self.hover(self.last_hover)
 
 
     def change_time_step(self, time_step):
         self.time_step = int(time_step)
+    def change_tax_rate(self, tax_rate):
+        self.population.government.tax_rate = tax_rate
+    def change_social_welfare(self, amount):
+        self.population.government.social_welfare = int(amount)
+    def change_retirement_age(self, retirement_age):
+        self.population.government.retirement_age = retirement_age
 
 
 if __name__ == '__main__':
