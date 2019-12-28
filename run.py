@@ -9,7 +9,7 @@ from matplotlib.widgets import *
 COLORMAP = plt.cm.rainbow
 COLORMAP_RANGE = (0.2,0.8)
 
-
+# todo : fix annotation box going outside window 
 
 class Run(object):
     def __init__(self):
@@ -199,6 +199,8 @@ class Run(object):
         text += f'health: {int(p.health)} \n'
         if p.job is not None:
             text += f'{p.job.name} \n'
+            try: text += f'Aspiration: {p.job.job_aspiration} \n'
+            except: pass
             text += f'salary: {int(p.job.salary)} \n'
         text += f'money: '+self.format_money(p.money)+' \n'
         text += f'education: {p.education} \n'
