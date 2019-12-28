@@ -18,7 +18,7 @@ class Population(object):
         self.government = government.Government(self)
         for p in self:
             p.age = random.choice(range(20,80))
-        self.stats_names = ['Population','Mean age','Mean money','Single males','Single females','Couples','Kids']
+        self.stats_names = ['Population','Mean age','Mean money','Mean health','Single males','Single females','Couples','Kids']
         self.food = n_start*5
         self.update_status()
 
@@ -50,6 +50,7 @@ class Population(object):
             self.stats['Population'] += 1
             self.stats['Mean age'] += p.age
             self.stats['Mean money'] += p.money
+            self.stats['Mean health'] += p.health
             if p.couple is None and p.sex == 1 and p.age >= MAJORITY_AGE:
                 self.stats['Single males'] += 1
                 self.single_males.append(p)
@@ -85,9 +86,11 @@ class Population(object):
         try:
             self.stats['Mean age'] /= self.stats['Population']
             self.stats['Mean money'] /= self.stats['Population']
+            self.stats['Mean health'] /= self.stats['Population']
         except:
             self.stats['Mean age'] = 0
             self.stats['Mean money'] = 0
+            self.stats['Mean health'] = 0
 
     def __len__(self):
         return len(self.persons)
@@ -158,6 +161,7 @@ class Person(object):
         self.number_of_desired_kids = int(np.round(random.gauss(3,1.5)))
         self.job = None
         self.money = 0
+        self.health = 100
         self.education = {}
         self.experience = {}
         self.xy = (random.random(), random.random())
@@ -186,7 +190,8 @@ class Person(object):
         elif self.age >= 14 and self.age < self.population.government.retirement_age:
             self.job = jobs.find_job(self)
 
-        if random.random() < self.mortality_rate:
+        self.health_decay()
+        if self.health <= 0:
             self.die()
             return None
 
@@ -206,6 +211,7 @@ class Person(object):
             self.age += 1
         else: 
             self.die()
+            return None
 
     @property
     def score(self):
@@ -221,14 +227,8 @@ class Person(object):
             elif self.sex == 1:
                 return [0.3,0.3,1] #blue
 
-    @property
-    def mortality_rate(self):
-        # Exponential mortality rate. 
-        # At age = LIFE_EXPECTANCY, the mortality rate is MORTALITY_RATE 
-        # and at age = 100, the mortality rate is 1
-        c = np.log(MORTALITY_RATE)/(LIFE_EXPECTANCY-100)
-        return np.exp(c*(self.age-100))
-         
+    def health_decay(self):
+        self.health -= random.random()*100*np.exp(np.log(MORTALITY_RATE)/(LIFE_EXPECTANCY-100)*(self.age-100))
 
     def die(self):
         if self.couple is not None:

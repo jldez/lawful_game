@@ -193,6 +193,7 @@ class Run(object):
         text = p.name + ' \n'
         text += p.status + ' \n'
         text += f'age: {p.age} \n'
+        text += f'health: {p.health} \n'
         if p.job is not None:
             text += f'{p.job.name} \n'
             text += f'salary: {int(p.job.salary)} \n'
