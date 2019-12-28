@@ -179,7 +179,8 @@ class Run(object):
     def update_annot(self, ind):
         self.person_annotation.xy = self.people_scatter_data.get_offsets()[ind]
         p = self.population.persons[ind]
-        text = p.status + ' \n'
+        text = p.name + ' \n'
+        text += p.status + ' \n'
         text += f'age: {p.age} \n'
         if p.job is not None:
             text += f'{p.job.name} \n'

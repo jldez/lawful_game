@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import names
 import jobs
 import government
 
@@ -122,6 +123,7 @@ class Couple(object):
         if self.mother.age <= 55 and nb_desired_kids > 0:
             if NATALITY_RATE > random.random():
                 baby = Person(self.father.population)
+                baby.name = baby.name.split(' ')[0] + ' ' + self.father.name.split(' ')[1]
                 baby.father = self.father
                 baby.mother = self.mother
                 self.father.population.persons.append(baby)
@@ -147,6 +149,7 @@ class Person(object):
     def __init__(self, population:Population):
         self.population = population
         self.sex = random.choice([0,1])
+        self.name = names.get_full_name(gender='male') if self.sex==1 else names.get_full_name(gender='female')
         self.age = 0
         self.sex_appeal = int(np.clip(random.gauss(50,20),0,100))
         self.couple = None
