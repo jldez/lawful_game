@@ -215,8 +215,8 @@ class Person(object):
 
     @property
     def score(self):
-        score = np.clip(self.age,0,100) + np.clip(self.money/1e4,0,100)
-        return score
+        score = np.clip(self.age,0,100) + np.clip(self.money/1e4,0,100) - np.clip(100-self.health,0,100)
+        return np.clip(score,0,100)
     @property
     def color(self):
         if self.age < MAJORITY_AGE:

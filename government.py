@@ -11,6 +11,7 @@ class Government(object):
         self.tax_rate = 0.3
         self.social_welfare = 1e4
         self.retirement_age = 65
+        self.public_healthcare = 0.5
 
     def update(self):
 

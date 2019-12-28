@@ -2,6 +2,7 @@ import random
 import numpy as np
 
 MINIMUM_WAGE = 2e4
+HEALTHCARE_PRICE = 1e3
 
 
 class Job(object):
@@ -113,22 +114,33 @@ class Judge(Job):
         self.domain = 'law'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
-class Nurse(Job):
+class HealthJob(Job):
+    def update(self):
+        super(HealthJob, self).update()
+        patient = random.choice(self.person.population)
+        patient.health = np.clip(patient.health+self.health_recovery, 0, 100)
+        patient.money -= self.health_recovery*HEALTHCARE_PRICE*(1-patient.population.government.public_healthcare)
+        patient.population.government.money -= self.health_recovery*HEALTHCARE_PRICE*patient.population.government.public_healthcare
+
+class Nurse(HealthJob):
     def __init__(self, person):
         self.name = 'Nurse'
         self.domain = 'medecine'
+        self.health_recovery = 10
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
-class Doctor(Job):
+class Doctor(HealthJob):
     def __init__(self, person):
         self.name = 'Doctor'
         self.domain = 'medecine'
+        self.health_recovery = 20
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
-class Surgeon(Job):
+class Surgeon(HealthJob):
     def __init__(self, person):
         self.name = 'Surgeon'
         self.domain = 'medecine'
+        self.health_recovery = 30
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Architect(Job):

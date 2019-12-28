@@ -35,6 +35,9 @@ class Run(object):
         self.fig.text(0.9,0.84,'Retirement age')
         self.retirement_age_slider = Slider(plt.axes([0.9, 0.815, 0.05, 0.02]), None, 0, 100, valinit=self.population.government.retirement_age, valfmt='%3d', valstep=1, orientation='horizontal')
         self.retirement_age_slider.on_changed(self.change_retirement_age)
+        self.fig.text(0.9,0.78,'Healthcare')
+        self.healthcare_slider = Slider(plt.axes([0.9, 0.755, 0.05, 0.02]), None, 0, 1, valinit=self.population.government.public_healthcare, valfmt='%1.2f', valstep=0.01, orientation='horizontal')
+        self.healthcare_slider.on_changed(self.change_healthcare)
         
         self.stats_ax = self.axs[0,0]
         self.stats_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(self.population.stats)))
@@ -193,7 +196,7 @@ class Run(object):
         text = p.name + ' \n'
         text += p.status + ' \n'
         text += f'age: {p.age} \n'
-        text += f'health: {p.health} \n'
+        text += f'health: {int(p.health)} \n'
         if p.job is not None:
             text += f'{p.job.name} \n'
             text += f'salary: {int(p.job.salary)} \n'
@@ -302,6 +305,8 @@ class Run(object):
         self.population.government.social_welfare = int(amount)
     def change_retirement_age(self, retirement_age):
         self.population.government.retirement_age = retirement_age
+    def change_healthcare(self, healthcare):
+        self.population.government.public_healthcare = healthcare
 
 
 if __name__ == '__main__':
