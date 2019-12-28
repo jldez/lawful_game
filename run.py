@@ -3,7 +3,7 @@ import jobs
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import *
-from matplotlib.widgets import Button
+from matplotlib.widgets import *
 
 
 COLORMAP = plt.cm.rainbow
@@ -19,7 +19,11 @@ class Run(object):
         self.population = people.Population(200)
         self.time = [0]
 
-        self.resources_text = self.fig.text(0.03,0.93,'')
+        self.time_step = 1
+        self.time_step_slider = Slider(plt.axes([0.065, 0.95, 0.05, 0.02]), 'Time step ', 1, 100, valinit=1, valfmt='%3d', valstep=1, orientation='horizontal')
+        self.time_step_slider.on_changed(self.change_time_step)
+
+        self.resources_text = self.fig.text(0.03,0.9,'')
         
         self.stats_ax = self.axs[0,0]
         self.stats_colors = COLORMAP(np.linspace(COLORMAP_RANGE[0], COLORMAP_RANGE[1], len(self.population.stats)))
@@ -93,10 +97,11 @@ class Run(object):
             self.__init__()
 
         if event.key in [' ']: #update
-            self.population.update()
-            self.time.append(len(self.time))
-            for name in self.population.stats_names:
-                self.track_stats[name].append(self.population.stats[name])
+            for t in range(self.time_step):
+                self.population.update()
+                self.time.append(len(self.time))
+                for name in self.population.stats_names:
+                    self.track_stats[name].append(self.population.stats[name])
 
         if event.key in ['right','left']: #Tracking
             track_index = list(self.track_stats.keys()).index(self.tracking_name)
@@ -148,6 +153,7 @@ class Run(object):
 
         self.fig.canvas.draw_idle()
         self.fig.canvas.flush_events()
+
 
     @staticmethod
     def format_money(money):
@@ -272,6 +278,10 @@ class Run(object):
         elif event.button == 3:
             self.freeze_hover = None
             self.hover(self.last_hover)
+
+
+    def change_time_step(self, time_step):
+        self.time_step = int(time_step)
 
 
 if __name__ == '__main__':
