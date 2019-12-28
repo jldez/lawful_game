@@ -1,8 +1,10 @@
 import people
 import jobs
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import *
-import numpy as np
+from matplotlib.widgets import Button
+
 
 COLORMAP = plt.cm.rainbow
 COLORMAP_RANGE = (0.2,0.8)
@@ -176,10 +178,13 @@ class Run(object):
         if p.job is not None:
             text += f'{p.job.name} \n'
             text += f'salary: {int(p.job.salary)} \n'
-        text += f'money: {int(p.money)} \n'
+        text += f'money: '+self.format_money(p.money)+' \n'
         text += f'education: {p.education} \n'
-        text += f'experience: {p.experience}'
-        self.person_annotation.set_text(text)
+        text += f'experience: {p.experience} \n'
+        text += 'history: \n'
+        for line in p.history:
+            text += line+' \n'
+        self.person_annotation.set_text(text[:-2])
 
         connections = []
         for parent in [p.father, p.mother]:

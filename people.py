@@ -108,6 +108,9 @@ class Couple(object):
         self.father = father
         self.mother = mother
         self.love = int(np.round(random.gauss(50,20)))
+        self.father.history.append(f'Married at {self.father.age}')
+        self.mother.history.append(f'Married at {self.mother.age}')
+        self.age = 0
 
     @property
     def kids(self):
@@ -123,18 +126,21 @@ class Couple(object):
         nb_desired_kids = int(np.round((self.father.number_of_desired_kids + self.mother.number_of_desired_kids)/2))
         if self.mother.age <= 55 and nb_desired_kids > 0:
             if NATALITY_RATE > random.random():
-                self.father.number_of_desired_kids -= 1
-                self.mother.number_of_desired_kids -= 1
                 baby = Person(self.father.population)
-                self.father.population.persons.append(baby)
-                self.father.kids.append(baby)
-                self.mother.kids.append(baby)
                 baby.father = self.father
                 baby.mother = self.mother
+                self.father.population.persons.append(baby)
+                for parent in [self.father, self.mother]:
+                    parent.number_of_desired_kids -= 1
+                    parent.kids.append(baby)
+                    parent.history.append(f'Had baby at {parent.age}')
+        
+        self.age += 1
 
     def break_up(self):
-        self.father.couple = None
-        self.mother.couple = None
+        for p in [self.father, self.mother]:
+            p.couple = None
+            p.history.append(f'Divorced after {self.age} years of marriage')
         del self
 
                     
@@ -159,6 +165,7 @@ class Person(object):
         self.father = None
         self.mother = None
         self.kids = []
+        self.history = []
 
     def update(self):
 
@@ -218,8 +225,10 @@ class Person(object):
         if self.couple is not None:
             if self.sex == 0:
                 self.couple.father.couple = None
+                self.couple.father.history.append(f'Widowed after {self.couple.age} years of marriage')
             elif self.sex == 1:
                 self.couple.mother.couple = None
+                self.couple.mother.history.append(f'Widowed after {self.couple.age} years of marriage')
 
         for parent in [self.father, self.mother]:
             if parent is not None:

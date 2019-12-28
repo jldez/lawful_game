@@ -23,12 +23,14 @@ class Job(object):
         if self.person.age >= RETIREMENT_AGE:
             self.person.population.job_stats[self.name] -= 1
             self.person.job = None
+            self.person.history.append(f'Retired at {self.person.age}')
 
         elif self.name is not 'Student':
             #Check if too many workers on that job
             if self.person.population.job_stats[self.name] > np.floor(JOBS[self.name]['proportion']*len(self.person.population)):
                 self.person.population.job_stats[self.name] -= 1
                 self.person.job = None
+                self.person.history.append(f'Fired from {self.name} job at {self.person.age}')
 
             else:
                 self.salary = min(self.salary*1.02, JOBS[self.name]['max_salary'])
@@ -45,6 +47,7 @@ class Job(object):
                 self.person.population.job_stats[self.person.job.name] -= 1 #remove count from previous job
                 self.person.job = JOBS[self.promotion_name]['class'](self.person) #change to new job
                 self.person.population.job_stats[self.person.job.name] += 1 #add count to new job
+                self.person.history.append(f'Promoted to {self.promotion_name} at {self.person.age}')
 
 
 
@@ -58,10 +61,10 @@ class Farmer(Job):
         self.person.population.food += 10 + min(self.person.experience[self.domain],10)
 
 class Cook(Job):
-    def __init__(self, person, promotion_name='Chef'):
+    def __init__(self, person):
         self.name = 'Cook'
         self.domain = 'cooking'
-        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+        super().__init__(person, salary=JOBS[self.name]['base_salary'], promotion_name='Chef')
         
 class Chef(Job):
     def __init__(self, person):
@@ -82,10 +85,10 @@ class Journalist(Job):
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Scientist(Job):
-    def __init__(self, person, promotion_name='Professor'):
+    def __init__(self, person):
         self.name = 'Scientist'
         self.domain = 'science'
-        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+        super().__init__(person, salary=JOBS[self.name]['base_salary'], promotion_name='Professor')
 
 class Professor(Job):
     def __init__(self, person):
@@ -100,10 +103,10 @@ class Teacher(Job):
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Lawyer(Job):
-    def __init__(self, person, promotion_name='Judge'):
+    def __init__(self, person):
         self.name = 'Lawyer'
         self.domain = 'law'
-        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+        super().__init__(person, salary=JOBS[self.name]['base_salary'], promotion_name='Judge')
 
 class Judge(Job):
     def __init__(self, person):
@@ -142,10 +145,10 @@ class Cashier(Job):
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Deputee(Job):
-    def __init__(self, person, promotion_name='Minister'):
+    def __init__(self, person):
         self.name = 'Deputee'
         self.domain = 'politics'
-        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+        super().__init__(person, salary=JOBS[self.name]['base_salary'], promotion_name='Minister')
     def update(self):
         self.person.population.government.money -= self.salary
         super(Deputee, self).update()
@@ -160,10 +163,10 @@ class Minister(Job):
         super(Minister, self).update()
 
 class Salesman(Job):
-    def __init__(self, person, promotion_name='Businessman'):
+    def __init__(self, person):
         self.name = 'Salesman'
         self.domain = 'finance'
-        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+        super().__init__(person, salary=JOBS[self.name]['base_salary'], promotion_name='Businessman')
 
 class Businessman(Job):
     def __init__(self, person):
@@ -216,6 +219,7 @@ def find_job(person):
                 best_salary = JOBS[name]['base_salary']
                 best_job = JOBS[name]['class']
         person.population.job_stats[name] += 1
+        person.history.append(f'Hired as {name} at {person.age}')
         return best_job(person)
     else:
         return None
@@ -266,6 +270,7 @@ class Student(Job):
                                              'medecine',
                                              'law',
                                             ])
+                self.person.history.append(f'Started to study {self.domain}')
         elif self.person.age > 18:
             if self.person.age < 20:
                 if random.random() < 0.1:
@@ -280,5 +285,6 @@ class Student(Job):
                 end_studies = True
             
         if end_studies:
+            self.person.history.append(f'Finished school at {self.person.age}')
             self.person.job = None
             del self
