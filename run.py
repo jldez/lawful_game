@@ -53,7 +53,7 @@ class Run(object):
         self.ax_people.get_xaxis().set_visible(False)
         self.ax_people.get_yaxis().set_visible(False)
 
-        self.people_scatter_data = self.ax_people.scatter(self.population.positions[:,0],self.population.positions[:,1])
+        self.people_scatter_data = self.ax_people.scatter(self.population.positions[:,0],self.population.positions[:,1], cmap=COLORMAP, alpha=0.75)
         self.person_annotation = self.ax_people.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                     bbox=dict(boxstyle="round", fc="w"),
                     arrowprops=dict(arrowstyle="->"))
@@ -139,6 +139,8 @@ class Run(object):
             self.track_ax.set_ylim(min(data[-max_length:]),max(data[-max_length:]))
 
         self.people_scatter_data.set_offsets(self.population.positions)
+        self.people_scatter_data.set_sizes(self.population.scores)
+        self.people_scatter_data.set_color(self.population.colors)
         try: self.hover(self.last_hover)
         except: pass
 
@@ -227,23 +229,33 @@ class Run(object):
                     bar_name = self.jobs_names[i]
 
         highlight_positions = np.empty((0,2))
+        highlight_scores = np.empty(0)
         if bar_name == 'Single males':
             highlight_positions = np.array([p.xy for p in self.population.single_males])
+            highlight_scores = np.array([p.score for p in self.population.single_males])
         if bar_name == 'Single females':
             highlight_positions = np.array([p.xy for p in self.population.single_females])
+            highlight_scores = np.array([p.score for p in self.population.single_females])
         if bar_name == 'Couples':
             highlight_positions = np.array([c.father.xy for c in self.population.couples]+[c.mother.xy for c in self.population.couples])
+            highlight_scores = np.array([c.father.score for c in self.population.couples]+[c.mother.score for c in self.population.couples])
         if bar_name == 'Kids':
             highlight_positions = np.array([p.xy for p in self.population.kids])
+            highlight_scores = np.array([p.score for p in self.population.kids])
         if bar_name == 'Unemployed':
             highlight_positions = np.array([p.xy for p in self.population.unemployed])
+            highlight_scores = np.array([p.score for p in self.population.unemployed])
         if bar_name == 'Retired':
             highlight_positions = np.array([p.xy for p in self.population.retired])
+            highlight_scores = np.array([p.score for p in self.population.retired])
         elif bar_name in self.jobs_names[:-2]:
             highlight_positions = np.array([p.xy for p in self.population if p.job is not None and p.job.name == bar_name])
+            highlight_scores = np.array([p.score for p in self.population if p.job is not None and p.job.name == bar_name])
 
         self.people_highlight_data.set_offsets(highlight_positions)
-        self.fig.canvas.draw_idle()
+        self.people_highlight_data.set_sizes(highlight_scores)
+        if not self.updating:
+            self.fig.canvas.draw_idle()
 
         
 

@@ -43,6 +43,8 @@ class Population(object):
         self.job_stats['Unemployed'] = 0
         self.job_stats['Retired'] = 0
         self.positions = []
+        self.scores = []
+        self.colors = []
         for p in self:
             self.stats['Population'] += 1
             self.stats['Mean age'] += p.age
@@ -73,9 +75,12 @@ class Population(object):
                 self.job_stats['Retired'] += 1
                 self.retired.append(p)
             self.positions.append(p.xy)
+            self.scores.append(p.score)
+            self.colors.append(p.color)
         self.stats['Couples'] = int(self.stats['Couples']/2)
         self.couples = set(self.couples)
         self.positions = np.array(self.positions)
+        self.scores = np.array(self.scores)
         try:
             self.stats['Mean age'] /= self.stats['Population']
             self.stats['Mean money'] /= self.stats['Population']
@@ -194,6 +199,20 @@ class Person(object):
             self.age += 1
         else: 
             self.die()
+
+    @property
+    def score(self):
+        score = np.clip(self.age,0,100) + np.clip(self.money/1e4,0,100)
+        return score
+    @property
+    def color(self):
+        if self.age < MAJORITY_AGE:
+            return [0.8,0.8,0.1]
+        else:
+            if self.sex==0:
+                return [1,0.3,0.3]
+            elif self.sex == 1:
+                return [0.3,0.3,1]
 
     def die(self):
         if self.couple is not None:
