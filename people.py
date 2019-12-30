@@ -3,12 +3,16 @@ import numpy as np
 import names
 import jobs
 import government
+import goods_services
 
 MAJORITY_AGE = 18
+MIN_WORKING_AGE = 14
 FOOD_PRICE = 5e3
+LOGEMENT_PRICE = 5e3
 NATALITY_RATE = 0.3
 LIFE_EXPECTANCY = 80
 MORTALITY_RATE = 0.1
+MENOPAUSE_AGE = 55
 
 
 class Population(object):
@@ -125,7 +129,7 @@ class Couple(object):
             self.break_up()
 
         nb_desired_kids = int(np.round((self.father.number_of_desired_kids + self.mother.number_of_desired_kids)/2))
-        if self.mother.age <= 55 and nb_desired_kids > 0:
+        if self.mother.age <= MENOPAUSE_AGE and nb_desired_kids > 0:
             if NATALITY_RATE > random.random() and self.money > 0:
                 baby = Person(self.father.population)
                 baby.name = baby.name.split(' ')[0] + ' ' + self.father.name.split(' ')[1]
@@ -139,10 +143,13 @@ class Couple(object):
         
         self.age += 1
 
-    def break_up(self):
+    def break_up(self, history_log=True):
         for p in [self.father, self.mother]:
             p.couple = None
-            p.history.append(f'Divorced after {self.age} years of marriage')
+            if 'house' in p.belongings:
+                p.belongings.pop('house') #For now, simply lose the house if the couple breaks up
+            if history_log:
+                p.history.append(f'Divorced after {self.age} years of marriage')
         del self
 
                     
@@ -170,6 +177,7 @@ class Person(object):
         self.mother = None
         self.kids = []
         self.history = []
+        self.belongings = {}
 
     def update(self):
 
@@ -187,7 +195,7 @@ class Person(object):
             except: pass
         elif self.age == 5:
             self.job = jobs.Student(person=self)
-        elif self.age >= 14 and self.age < self.population.government.retirement_age:
+        elif self.age >= MIN_WORKING_AGE and self.age < self.population.government.retirement_age:
             self.job = jobs.find_job(self)
 
         self.health_decay()
@@ -196,22 +204,43 @@ class Person(object):
             return None
 
         if self.population.food > 0:
-            if self.age >= MAJORITY_AGE:
-                self.money -= FOOD_PRICE
-            else:
-                if self.father is not None:
-                    self.father.money -= FOOD_PRICE/2
-                else:
-                    self.population.government.money -= FOOD_PRICE/2
-                if self.mother is not None:
-                    self.mother.money -= FOOD_PRICE/2
-                else:
-                    self.population.government.money -= FOOD_PRICE/2
+            self.pay(FOOD_PRICE)
             self.population.food -= 1
             self.age += 1
         else: 
             self.die()
             return None
+
+        if 'house' not in self.belongings:
+            self.pay(LOGEMENT_PRICE)
+
+        if self.age >= MAJORITY_AGE:
+            self.buy_stuff()
+
+    def pay(self, amount):
+        if self.age >= MAJORITY_AGE:
+            self.money -= amount
+        else:
+            if self.father is not None and self.mother is not None:
+                self.father.money -= amount/2
+                self.mother.money -= amount/2
+            elif self.father is not None and self.mother is None:
+                self.father.money -= amount
+            elif self.mother is not None and self.father is None:
+                self.mother.money -= amount
+            else:
+                self.money -= amount
+
+    def buy_stuff(self):
+        if 'house' not in self.belongings and self.couple is not None and len(goods_services.AVAILABLE_GOODS['houses'])>0:
+            house = goods_services.AVAILABLE_GOODS['houses'][0]
+            if self.couple.money >= house.price:
+                goods_services.AVAILABLE_GOODS['houses'].pop(0)
+                for p in [self.couple.father,self.couple.mother]:
+                    p.pay(house.price/2)
+                    p.belongings['house'] = house
+                    p.history.append('Bought as house')
+
 
     @property
     def score(self):
@@ -226,19 +255,24 @@ class Person(object):
                 return [1,0.3,0.3] #red
             elif self.sex == 1:
                 return [0.3,0.3,1] #blue
+    @property
+    def happiness(self):
+        return 100
 
     def health_decay(self):
         # Aging
         self.health -= random.random()*100*np.exp(np.log(MORTALITY_RATE)/(LIFE_EXPECTANCY-100)*(self.age-100))
+        # Sickness
+        if random.random() < 0.1:
+            self.health -= random.random()*30
 
     def die(self):
         if self.couple is not None:
             if self.sex == 0:
-                self.couple.father.couple = None
                 self.couple.father.history.append(f'Widowed after {self.couple.age} years of marriage')
             elif self.sex == 1:
-                self.couple.mother.couple = None
                 self.couple.mother.history.append(f'Widowed after {self.couple.age} years of marriage')
+            self.couple.break_up(history_log=False)
 
         for parent in [self.father, self.mother]:
             if parent is not None:

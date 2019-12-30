@@ -1,5 +1,6 @@
 import people
 import jobs
+import goods_services
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import *
@@ -77,6 +78,7 @@ class Run(object):
         self.ax_people = self.fig.add_subplot(gs[:,-1], frame_on=False)
         self.ax_people.get_xaxis().set_visible(False)
         self.ax_people.get_yaxis().set_visible(False)
+        self.display_history = True
 
         self.people_scatter_data = self.ax_people.scatter(self.population.positions[:,0],self.population.positions[:,1], cmap=COLORMAP, alpha=0.75)
         self.person_annotation = self.ax_people.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
@@ -114,6 +116,9 @@ class Run(object):
         if event.key == 'r': #restart
             plt.clf()
             self.__init__()
+
+        if event.key == 'h': #hide/show person's history in hover annotation
+            self.display_history = not self.display_history
 
         if event.key in [' ']: #update
             for t in range(self.time_step):
@@ -170,6 +175,7 @@ class Run(object):
         try: self.hover(self.last_hover)
         except: pass
 
+        print(len(goods_services.AVAILABLE_GOODS['houses']))
         self.fig.canvas.draw_idle()
         self.fig.canvas.flush_events()
 
@@ -202,6 +208,7 @@ class Run(object):
         text += p.status + ' \n'
         text += f'age: {p.age} \n'
         text += f'health: {int(p.health)} \n'
+        text += f'happiness: {int(p.happiness)} \n'
         if p.job is not None:
             text += f'{p.job.name} \n'
             try: text += f'Aspiration: {p.job.job_aspiration} \n'
@@ -210,9 +217,11 @@ class Run(object):
         text += f'money: '+self.format_money(p.money)+' \n'
         text += f'education: {p.education} \n'
         text += f'experience: {p.experience} \n'
-        text += 'history: \n'
-        for line in p.history:
-            text += line+' \n'
+        text += f'belongings: {list(p.belongings.keys())} \n'
+        if self.display_history:
+            text += 'history: \n'
+            for line in p.history:
+                text += line+' \n'
         self.person_annotation.set_text(text[:-2])
 
         connections = []

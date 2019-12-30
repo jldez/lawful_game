@@ -3,7 +3,7 @@ import numpy as np
 import goods_services
 
 MINIMUM_WAGE = 2e4
-HEALTHCARE_PRICE = 1e3
+HEALTHCARE_PRICE = 2e3
 
 # Todo : change job for better one if available
 # Todo : get aspirated job if it becomes available after getter another one
@@ -122,29 +122,30 @@ class HealthJob(Job):
         super(HealthJob, self).update()
         for k in range(5):
             patient = random.choice(self.person.population)
-            patient.health = np.clip(patient.health+self.health_recovery, 0, 100)
-            patient.money -= self.health_recovery*HEALTHCARE_PRICE*(1-patient.population.government.public_healthcare)
-            patient.population.government.money -= self.health_recovery*HEALTHCARE_PRICE*patient.population.government.public_healthcare
+            recovery = min([100-patient.health, self.max_health_recovery])
+            patient.health += recovery
+            patient.pay(recovery*HEALTHCARE_PRICE*(1-patient.population.government.public_healthcare))
+            patient.population.government.money -= recovery*HEALTHCARE_PRICE*patient.population.government.public_healthcare
 
 class Nurse(HealthJob):
     def __init__(self, person):
         self.name = 'Nurse'
         self.domain = 'medecine'
-        self.health_recovery = 10
+        self.max_health_recovery = 10
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Doctor(HealthJob):
     def __init__(self, person):
         self.name = 'Doctor'
         self.domain = 'medecine'
-        self.health_recovery = 20
+        self.max_health_recovery = 20
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Surgeon(HealthJob):
     def __init__(self, person):
         self.name = 'Surgeon'
         self.domain = 'medecine'
-        self.health_recovery = 30
+        self.max_health_recovery = 30
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Builder(Job):
@@ -152,14 +153,12 @@ class Builder(Job):
         self.name = 'Builder'
         self.domain = 'construction'
         self.house_completion = 0
-        self.house_to_sell = None
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
-        if self.house_to_sell is None:
-            self.house_completion += 20
+        self.house_completion += 20
         if self.house_completion >= 100:
             self.house_completion = 0
-            self.house_to_sell = goods_services.House(3e5)
+        goods_services.AVAILABLE_GOODS['houses'].append(goods_services.House())
         super(Builder, self).update()
 
 class Architect(Job):
@@ -220,7 +219,7 @@ JOBS = {
     'Nurse':      {'class':Nurse,      'requirements':{'education':{'medecine':2}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.08},
     'Doctor':     {'class':Doctor,     'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'max_salary':3e5,              'proportion':0.04},
     'Surgeon':    {'class':Surgeon,    'requirements':{'education':{'medecine':10}},                           'base_salary':3e5,          'max_salary':5e5,              'proportion':0.02},
-    'Builder':    {'class':Builder,    'requirements':None,                                                    'base_salary':4e4,          'max_salary':6e4,              'proportion':0.08},
+    'Builder':    {'class':Builder,    'requirements':None,                                                    'base_salary':4e4,          'max_salary':6e4,              'proportion':0.01},
     'Architect':  {'class':Architect,  'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.03},
     'Cashier':    {'class':Cashier,    'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
     'Deputee':    {'class':Deputee,    'requirements':None,                                                    'base_salary':8e4,          'max_salary':8e4,              'proportion':0.01},
@@ -245,10 +244,10 @@ def find_job(person):
         for name in requirements_met:
             if JOBS[name]['base_salary'] > best_salary:
                 best_salary = JOBS[name]['base_salary']
-                best_job = JOBS[name]['class']
-        person.population.job_stats[name] += 1
-        person.history.append(f'Hired as {name} at {person.age}')
-        return best_job(person)
+                best_job = name
+        person.population.job_stats[best_job] += 1
+        person.history.append(f'Hired as {best_job} at {person.age}')
+        return JOBS[best_job]['class'](person)
     else:
         return None
 
