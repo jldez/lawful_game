@@ -10,7 +10,8 @@ from matplotlib.widgets import *
 COLORMAP = plt.cm.rainbow
 COLORMAP_RANGE = (0.2,0.8)
 
-# todo : fix annotation box going outside window 
+# FIXME : annotation box going outside window 
+# FIXME : retired people still has job_aspiration
 
 class Run(object):
     def __init__(self):
@@ -175,7 +176,6 @@ class Run(object):
         try: self.hover(self.last_hover)
         except: pass
 
-        print(len(goods_services.AVAILABLE_GOODS['houses']))
         self.fig.canvas.draw_idle()
         self.fig.canvas.flush_events()
 
@@ -209,10 +209,10 @@ class Run(object):
         text += f'age: {p.age} \n'
         text += f'health: {int(p.health)} \n'
         text += f'happiness: {int(p.happiness)} \n'
+        if p.job_aspiration is not None:
+            text += f'Aspiration: {p.job_aspiration} \n'
         if p.job is not None:
-            text += f'{p.job.name} \n'
-            try: text += f'Aspiration: {p.job.job_aspiration} \n'
-            except: pass
+            text += f'Job: {p.job.name} \n'
             text += f'salary: {int(p.job.salary)} \n'
         text += f'money: '+self.format_money(p.money)+' \n'
         text += f'education: {p.education} \n'

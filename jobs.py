@@ -207,25 +207,25 @@ class Businessman(Job):
 
 JOBS = {
     'Farmer':     {'class':Farmer,     'requirements':None,                                                    'base_salary':4e4,          'max_salary':4e4,              'proportion':0.1},
-    'Cook':       {'class':Cook,       'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.1},
+    'Cook':       {'class':Cook,       'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
     'Chef':       {'class':Chef,       'requirements':{'experience':{'cooking':10}},                           'base_salary':5e4,          'max_salary':1e5,              'proportion':0.02},
-    'Secretary':  {'class':Secretary,  'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'max_salary':5e4,              'proportion':0.05},
+    'Secretary':  {'class':Secretary,  'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'max_salary':5e4,              'proportion':0.04},
     'Journalist': {'class':Journalist, 'requirements':{'education':{'communication':3}},                       'base_salary':3e4,          'max_salary':7e4,              'proportion':0.02},
     'Scientist':  {'class':Scientist,  'requirements':{'education':{'science':3}},                             'base_salary':6e4,          'max_salary':8e4,              'proportion':0.03},
     'Professor':  {'class':Professor,  'requirements':{'education':{'science':5},'experience':{'science':10}}, 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
-    'Teacher':    {'class':Teacher,    'requirements':{'education':{'general':12}},                            'base_salary':5e4,          'max_salary':7e4,              'proportion':0.07},
+    'Teacher':    {'class':Teacher,    'requirements':{'education':{'general':12}},                            'base_salary':5e4,          'max_salary':7e4,              'proportion':0.02},
     'Lawyer':     {'class':Lawyer,     'requirements':{'education':{'law':3}},                                 'base_salary':1e5,          'max_salary':2e5,              'proportion':0.01},
     'Judge':      {'class':Judge,      'requirements':{'education':{'law':6},    'experience':{'law':10}},     'base_salary':2e5,          'max_salary':3e5,              'proportion':0.001},
     'Nurse':      {'class':Nurse,      'requirements':{'education':{'medecine':2}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.08},
     'Doctor':     {'class':Doctor,     'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'max_salary':3e5,              'proportion':0.04},
     'Surgeon':    {'class':Surgeon,    'requirements':{'education':{'medecine':10}},                           'base_salary':3e5,          'max_salary':5e5,              'proportion':0.02},
-    'Builder':    {'class':Builder,    'requirements':None,                                                    'base_salary':4e4,          'max_salary':6e4,              'proportion':0.01},
-    'Architect':  {'class':Architect,  'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.03},
+    'Builder':    {'class':Builder,    'requirements':None,                                                    'base_salary':4e4,          'max_salary':6e4,              'proportion':0.02},
+    'Architect':  {'class':Architect,  'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.01},
     'Cashier':    {'class':Cashier,    'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
     'Deputee':    {'class':Deputee,    'requirements':None,                                                    'base_salary':8e4,          'max_salary':8e4,              'proportion':0.01},
     'Minister':   {'class':Minister,   'requirements':{'experience':{'politics':12}},                          'base_salary':15e4,         'max_salary':15e4,             'proportion':0.002},
-    'Salesman':   {'class':Salesman,   'requirements':{'education': {'finance':1}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.07},
-    'Businessman':{'class':Businessman,'requirements':{'education': {'finance':3}, 'experience':{'finance':5}},'base_salary':1e5,          'max_salary':5e5,              'proportion':0.03},
+    'Salesman':   {'class':Salesman,   'requirements':{'education': {'finance':1}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.05},
+    'Businessman':{'class':Businessman,'requirements':{'education': {'finance':3}, 'experience':{'finance':5}},'base_salary':1e5,          'max_salary':5e5,              'proportion':0.02},
 }
 # print(sum([JOBS[n]['proportion'] for n in JOBS]))
 
@@ -283,7 +283,7 @@ class Student(Job):
         self.name = 'Student'
         self.domain = 'general'
         self.years_left = GENERAL_EDUCATION_YEARS
-        self.job_aspiration = np.random.choice([job for job in JOBS], p=self.job_attractiveness)
+        self.person.job_aspiration = np.random.choice([job for job in JOBS], p=self.job_attractiveness)
 
     def update(self):
         super(Student, self).update()
@@ -292,7 +292,7 @@ class Student(Job):
         except: self.person.education[self.domain] = 1
 
         if self.person.age >= MIN_DROPOUT_AGE:
-            if is_qualified(self.person, JOBS[self.job_aspiration], ignore_experience=True):
+            if is_qualified(self.person, JOBS[self.person.job_aspiration], ignore_experience=True):
                 end_studies = True
 
         # todo : random dropout
@@ -300,10 +300,10 @@ class Student(Job):
         self.years_left -= 1
 
         if self.years_left <= 0:
-            for req in JOBS[self.job_aspiration]['requirements']['education']:
+            for req in JOBS[self.person.job_aspiration]['requirements']['education']:
                 if req not in self.person.education.keys():
                     self.domain = req
-                    self.years_left = JOBS[self.job_aspiration]['requirements']['education'][req]
+                    self.years_left = JOBS[self.person.job_aspiration]['requirements']['education'][req]
                     break
             
         if end_studies:

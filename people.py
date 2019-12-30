@@ -22,7 +22,7 @@ class Population(object):
         self.government = government.Government(self)
         for p in self:
             p.age = random.choice(range(20,80))
-        self.stats_names = ['Population','Mean age','Mean money','Mean health','Single males','Single females','Couples','Kids']
+        self.stats_names = ['Population','Age','Money','Health', 'Happiness','Single males','Single females','Couples','Kids']
         self.food = n_start*5
         self.update_status()
 
@@ -52,9 +52,10 @@ class Population(object):
         self.colors = []
         for p in self:
             self.stats['Population'] += 1
-            self.stats['Mean age'] += p.age
-            self.stats['Mean money'] += p.money
-            self.stats['Mean health'] += p.health
+            self.stats['Age'] += p.age
+            self.stats['Money'] += p.money
+            self.stats['Health'] += p.health
+            self.stats['Happiness'] += p.happiness
             if p.couple is None and p.sex == 1 and p.age >= MAJORITY_AGE:
                 self.stats['Single males'] += 1
                 self.single_males.append(p)
@@ -88,13 +89,15 @@ class Population(object):
         self.positions = np.array(self.positions)
         self.scores = np.array(self.scores)
         try:
-            self.stats['Mean age'] /= self.stats['Population']
-            self.stats['Mean money'] /= self.stats['Population']
-            self.stats['Mean health'] /= self.stats['Population']
+            self.stats['Age'] /= self.stats['Population']
+            self.stats['Money'] /= self.stats['Population']
+            self.stats['Health'] /= self.stats['Population']
+            self.stats['Happiness'] /= self.stats['Population']
         except:
-            self.stats['Mean age'] = 0
-            self.stats['Mean money'] = 0
-            self.stats['Mean health'] = 0
+            self.stats['Age'] = 0
+            self.stats['Money'] = 0
+            self.stats['Health'] = 0
+            self.stats['Happiness'] = 0
 
     def __len__(self):
         return len(self.persons)
@@ -167,6 +170,7 @@ class Person(object):
         self.couple = None
         self.number_of_desired_kids = int(np.round(random.gauss(3,1.5)))
         self.job = None
+        self.job_aspiration = None
         self.money = 0
         self.health = 100
         self.education = {}
@@ -244,20 +248,37 @@ class Person(object):
 
     @property
     def score(self):
-        score = np.clip(self.age,0,100) + np.clip(self.money/1e4,0,100) - np.clip(100-self.health,0,100)
-        return np.clip(score,0,100)
+        score = np.clip(self.age, 0, 100) + np.clip(self.money/1e4, 0, 100) - np.clip(100 - self.health, 0, 100)
+        return np.clip(score, 10, 100)
     @property
     def color(self):
         if self.age < MAJORITY_AGE:
-            return [0.8,0.8,0.1] #yellow
+            return [0.8, 0.8, 0.1] #yellow
         else:
-            if self.sex==0:
-                return [1,0.3,0.3] #red
+            if self.sex == 0:
+                return [1, 0.3, 0.3] #red
             elif self.sex == 1:
-                return [0.3,0.3,1] #blue
+                return [0.3, 0.3, 1] #blue
     @property
     def happiness(self):
-        return 100
+        happiness = 50
+        if self.money < 0:
+            happiness -= 10
+        if self.job is not None:
+            if self.job == self.job_aspiration:
+                happiness += 20
+            else:
+                happiness -= 10
+        if self.health < 50:
+            happiness -= 10
+        if self.couple is not None:
+            if self.couple.love > 50:
+                happiness += 10
+            else:
+                happiness -= 10
+        if 'house' in self.belongings:
+            happiness += 10
+        return np.clip(happiness, 0, 100)
 
     def health_decay(self):
         # Aging
