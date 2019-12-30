@@ -228,6 +228,7 @@ class Person(object):
                 return [0.3,0.3,1] #blue
 
     def health_decay(self):
+        # Aging
         self.health -= random.random()*100*np.exp(np.log(MORTALITY_RATE)/(LIFE_EXPECTANCY-100)*(self.age-100))
 
     def die(self):

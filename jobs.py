@@ -1,9 +1,12 @@
 import random
 import numpy as np
+import goods_services
 
 MINIMUM_WAGE = 2e4
 HEALTHCARE_PRICE = 1e3
 
+# Todo : change job for better one if available
+# Todo : get aspirated job if it becomes available after getter another one
 
 class Job(object):
 
@@ -143,6 +146,21 @@ class Surgeon(HealthJob):
         self.health_recovery = 30
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
+class Builder(Job):
+    def __init__(self, person):
+        self.name = 'Builder'
+        self.domain = 'construction'
+        self.house_completion = 0
+        self.house_to_sell = None
+        super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        if self.house_to_sell is None:
+            self.house_completion += 20
+        if self.house_completion >= 100:
+            self.house_completion = 0
+            self.house_to_sell = goods_services.House(3e5)
+        super(Builder, self).update()
+
 class Architect(Job):
     def __init__(self, person):
         self.name = 'Architect'
@@ -201,6 +219,7 @@ JOBS = {
     'Nurse':      {'class':Nurse,      'requirements':{'education':{'medecine':2}},                            'base_salary':4e4,          'max_salary':8e4,              'proportion':0.08},
     'Doctor':     {'class':Doctor,     'requirements':{'education':{'medecine':5}},                            'base_salary':2e5,          'max_salary':3e5,              'proportion':0.04},
     'Surgeon':    {'class':Surgeon,    'requirements':{'education':{'medecine':10}},                           'base_salary':3e5,          'max_salary':5e5,              'proportion':0.02},
+    'Builder':    {'class':Builder,    'requirements':None,                                                    'base_salary':4e4,          'max_salary':6e4,              'proportion':0.08},
     'Architect':  {'class':Architect,  'requirements':{'education':{'engineering':3}},                         'base_salary':7e4,          'max_salary':1e5,              'proportion':0.03},
     'Cashier':    {'class':Cashier,    'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.05},
     'Deputee':    {'class':Deputee,    'requirements':None,                                                    'base_salary':8e4,          'max_salary':8e4,              'proportion':0.01},
