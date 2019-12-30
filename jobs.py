@@ -234,11 +234,8 @@ JOBS = {
 def find_job(person):
 
     requirements_met = []
-
-    total_population = len(person.population)
-
     for name in JOBS:
-        if person.population.job_stats[name] < np.floor(JOBS[name]['proportion']*total_population):
+        if person.population.job_stats[name] < np.floor(JOBS[name]['proportion']*len(person.population)):
 
             if is_qualified(person, JOBS[name]):
                 requirements_met.append(name)
@@ -325,8 +322,8 @@ class Student(Job):
                     if req_education is not 'general':
                         req_years += JOBS[name]['requirements']['education'][req_education]
             except: pass
-            availability = 1 - self.person.population.job_stats[name] / (np.floor(JOBS[name]['proportion']*len(self.person.population)) +1e-9)
-            attractiveness = (JOBS[name]['base_salary']/1e4+JOBS[name]['max_salary']/1e4)/2 - req_years*2 + availability*20
+            availability = 100*(np.floor(JOBS[name]['proportion']*len(self.person.population)) - self.person.population.job_stats[name])/len(self.person.population)
+            attractiveness = (JOBS[name]['base_salary']/1e4+JOBS[name]['max_salary']/1e4)/2 - req_years*2 + availability*10
             job_att.append(np.clip(attractiveness, 1, 100))
 
         job_att = np.array(job_att)
