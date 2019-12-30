@@ -207,7 +207,7 @@ class Businessman(Job):
 
 
 JOBS = {
-    'Farmer':     {'class':Farmer,     'requirements':None,                                                    'base_salary':3e4,          'max_salary':3e4,              'proportion':0.1},
+    'Farmer':     {'class':Farmer,     'requirements':None,                                                    'base_salary':4e4,          'max_salary':4e4,              'proportion':0.1},
     'Cook':       {'class':Cook,       'requirements':None,                                                    'base_salary':MINIMUM_WAGE, 'max_salary':MINIMUM_WAGE*1.2, 'proportion':0.1},
     'Chef':       {'class':Chef,       'requirements':{'experience':{'cooking':10}},                           'base_salary':5e4,          'max_salary':1e5,              'proportion':0.02},
     'Secretary':  {'class':Secretary,  'requirements':{'education':{'general':12}},                            'base_salary':3e4,          'max_salary':5e4,              'proportion':0.05},
