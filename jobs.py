@@ -120,10 +120,11 @@ class Judge(Job):
 class HealthJob(Job):
     def update(self):
         super(HealthJob, self).update()
-        patient = random.choice(self.person.population)
-        patient.health = np.clip(patient.health+self.health_recovery, 0, 100)
-        patient.money -= self.health_recovery*HEALTHCARE_PRICE*(1-patient.population.government.public_healthcare)
-        patient.population.government.money -= self.health_recovery*HEALTHCARE_PRICE*patient.population.government.public_healthcare
+        for k in range(5):
+            patient = random.choice(self.person.population)
+            patient.health = np.clip(patient.health+self.health_recovery, 0, 100)
+            patient.money -= self.health_recovery*HEALTHCARE_PRICE*(1-patient.population.government.public_healthcare)
+            patient.population.government.money -= self.health_recovery*HEALTHCARE_PRICE*patient.population.government.public_healthcare
 
 class Nurse(HealthJob):
     def __init__(self, person):
