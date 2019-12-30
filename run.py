@@ -15,6 +15,7 @@ class Run(object):
     def __init__(self):
 
         self.fig, self.axs = plt.subplots(figsize=(21,9), ncols=2, nrows=3)
+        self.fig.canvas.set_window_title('Lawful Game')
 
         self.population = people.Population(200)
         self.time = [0]
@@ -59,6 +60,10 @@ class Run(object):
         self.jobs_ax.get_yaxis().set_visible(False)
         self.jobs_ax.set(frame_on=False)
         self.jobs_ax.set_ylim(0, self.max_stats)
+
+        x,y,w,h = self.jobs_ax.get_position().bounds
+        self.job_options_button = Button(plt.axes([0.03,y,0.05,0.03]), 'Jobs options')
+        self.job_options_button.on_clicked(self.open_job_options)
 
         self.track_ax = self.axs[2,0]
         self.track_stats = {name:[self.population.stats[name]] for name in self.population.stats_names}
@@ -309,6 +314,45 @@ class Run(object):
         self.population.government.retirement_age = retirement_age
     def change_healthcare(self, healthcare):
         self.population.government.public_healthcare = healthcare
+
+    def open_job_options(self, event):
+        self.job_options_window = plt.figure(figsize=(4,6))
+        self.job_options_window.canvas.set_window_title('Jobs Options')
+        self.textboxes = []
+
+        N = len(jobs.JOBS)
+
+        self.job_options_window.text(0.03,1-0.8/(N+2), 'Job')
+        self.job_options_window.text(0.3,1-0.8/(N+2), 'base salary')
+        self.job_options_window.text(0.55,1-0.8/(N+2), 'max salary')
+        self.job_options_window.text(0.8,1-0.8/(N+2), 'max prop.')
+
+        for i, name in enumerate(jobs.JOBS):
+
+            self.job_options_window.text(0.03,1-(i+2)/(N+2), name)
+            self.textboxes.append(TextBox(plt.axes([0.3, 1-(i+2)/(N+2)-0.005, 0.2, 0.03]), None, initial=str(int(jobs.JOBS[name]['base_salary'])), color='.95', hovercolor='1'))
+            self.textboxes[-1].on_submit(changeJobOption(name, 'base_salary'))
+            self.textboxes.append(TextBox(plt.axes([0.55, 1-(i+2)/(N+2)-0.005, 0.2, 0.03]), None, initial=str(int(jobs.JOBS[name]['max_salary'])), color='.95', hovercolor='1'))
+            self.textboxes[-1].on_submit(changeJobOption(name, 'max_salary'))
+            self.textboxes.append(TextBox(plt.axes([0.8, 1-(i+2)/(N+2)-0.005, 0.15, 0.03]), None, initial=str(jobs.JOBS[name]['proportion']), color='.95', hovercolor='1'))
+            self.textboxes[-1].on_submit(changeJobOption(name, 'proportion'))
+
+        plt.show()
+
+
+
+class changeJobOption(object):
+    def __init__(self, name, option):
+        self.name = name
+        self.option = option
+    def __call__(self, event):
+        if self.option == 'proportion':
+            jobs.JOBS[self.name][self.option] = float(event)
+        else:
+            jobs.JOBS[self.name][self.option] = int(event)
+            jobs.JOBS[self.name]['max_salary'] = max([jobs.JOBS[self.name]['base_salary'],jobs.JOBS[self.name]['max_salary']])
+
+    
 
 
 if __name__ == '__main__':
