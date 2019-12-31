@@ -79,7 +79,7 @@ class Run(object):
         self.ax_people = self.fig.add_subplot(gs[:,-1], frame_on=False)
         self.ax_people.get_xaxis().set_visible(False)
         self.ax_people.get_yaxis().set_visible(False)
-        self.display_history = True
+        self.annotations_verbose = 3
 
         self.people_scatter_data = self.ax_people.scatter(self.population.positions[:,0],self.population.positions[:,1], cmap=COLORMAP, alpha=0.75)
         self.person_annotation = self.ax_people.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
@@ -118,8 +118,10 @@ class Run(object):
             plt.clf()
             self.__init__()
 
-        if event.key == 'h': #hide/show person's history in hover annotation
-            self.display_history = not self.display_history
+        if event.key == 'i': #change amount of info in annotation box
+            self.annotations_verbose += 1
+            if self.annotations_verbose > 3:
+                self.annotations_verbose = 0
 
         if event.key in [' ']: #update
             for t in range(self.time_step):
@@ -204,25 +206,27 @@ class Run(object):
     def update_annot(self, ind):
         self.person_annotation.xy = self.people_scatter_data.get_offsets()[ind]
         p = self.population.persons[ind]
-        text = p.name + ' \n'
-        text += p.status + ' \n'
-        text += f'age: {p.age} \n'
-        text += f'health: {int(p.health)} \n'
-        text += f'happiness: {int(p.happiness)} \n'
-        if p.job_aspiration is not None:
-            text += f'Aspiration: {p.job_aspiration} \n'
-        if p.job is not None:
-            text += f'Job: {p.job.name} \n'
-            text += f'salary: {int(p.job.salary)} \n'
-        text += f'money: '+self.format_money(p.money)+' \n'
-        text += f'education: {p.education} \n'
-        text += f'experience: {p.experience} \n'
-        text += f'belongings: {list(p.belongings.keys())} \n'
-        if self.display_history:
-            text += 'history: \n'
-            for line in p.history:
-                text += line+' \n'
-        self.person_annotation.set_text(text[:-2])
+        if self.annotations_verbose > 0:
+            text = p.name + ' \n'
+            text += p.status + ' \n'
+            text += f'age: {p.age} \n'
+            if self.annotations_verbose > 1:
+                text += f'health: {int(p.health)} \n'
+                text += f'happiness: {int(p.happiness)} \n'
+                if p.job_aspiration is not None:
+                    text += f'Aspiration: {p.job_aspiration} \n'
+                if p.job is not None:
+                    text += f'Job: {p.job.name} \n'
+                    text += f'salary: {int(p.job.salary)} \n'
+                text += f'money: '+self.format_money(p.money)+' \n'
+            if self.annotations_verbose > 2:
+                text += f'education: {p.education} \n'
+                text += f'experience: {p.experience} \n'
+                text += f'belongings: {list(p.belongings.keys())} \n'
+                text += 'history: \n'
+                for line in p.history:
+                    text += line+' \n'
+            self.person_annotation.set_text(text[:-2])
 
         connections = []
         for parent in [p.father, p.mother]:
@@ -234,7 +238,8 @@ class Run(object):
             connections += [ConnectionPatch(p.xy, kid.xy, 'data', color='y') for kid in p.kids]
         if len(connections) > 0:
             [self.ax_people.add_patch(connection) for connection in connections]
-        
+
+
 
     def hover(self, event):
 
@@ -251,7 +256,7 @@ class Run(object):
             cont, ind = self.people_scatter_data.contains(event)
             if cont:
                 self.update_annot(ind['ind'][0])
-                self.person_annotation.set_visible(True)
+                self.person_annotation.set_visible(self.annotations_verbose > 0)
             else:
                 if vis:
                     self.person_annotation.set_visible(False)
