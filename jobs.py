@@ -47,10 +47,13 @@ class Job(object):
     def check_for_promotion(self):
         if self.person.population.job_stats[self.promotion_name] < np.floor(JOBS[self.promotion_name]['proportion']*len(self.person.population)):
             if is_qualified(self.person, JOBS[self.promotion_name]):
+                if self.person.job_aspiration == self.person.job.name: #Update job aspiration to not lose happiness
+                    self.person.job_aspiration = self.promotion_name
                 self.person.population.job_stats[self.person.job.name] -= 1 #remove count from previous job
                 self.person.job = JOBS[self.promotion_name]['class'](self.person) #change to new job
                 self.person.population.job_stats[self.person.job.name] += 1 #add count to new job
                 self.person.history.append(f'Promoted to {self.promotion_name} at {self.person.age}')
+                
 
 
 
@@ -240,11 +243,14 @@ def find_job(person):
                 requirements_met.append(name)
 
     if len(requirements_met) > 0:
-        best_job, best_salary = None, 0
-        for name in requirements_met:
-            if JOBS[name]['base_salary'] > best_salary:
-                best_salary = JOBS[name]['base_salary']
-                best_job = name
+        if person.job_aspiration in requirements_met:
+            best_job = person.job_aspiration
+        else:
+            best_job, best_salary = None, 0
+            for name in requirements_met:
+                if JOBS[name]['base_salary'] > best_salary:
+                    best_salary = JOBS[name]['base_salary']
+                    best_job = name
         person.population.job_stats[best_job] += 1
         person.history.append(f'Hired as {best_job} at {person.age}')
         return JOBS[best_job]['class'](person)
