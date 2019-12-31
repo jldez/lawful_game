@@ -1,7 +1,9 @@
 import people
 import jobs
 import goods_services
+import events
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 from matplotlib.patches import *
 from matplotlib.widgets import *
@@ -79,7 +81,7 @@ class Run(object):
         self.ax_people = self.fig.add_subplot(gs[:,-1], frame_on=False)
         self.ax_people.get_xaxis().set_visible(False)
         self.ax_people.get_yaxis().set_visible(False)
-        self.annotations_verbose = 3
+        self.annotations_verbose = 3 # Amount of info in annotation box (0,1,2 or 3)
 
         self.people_scatter_data = self.ax_people.scatter(self.population.positions[:,0],self.population.positions[:,1], cmap=COLORMAP, alpha=0.75)
         self.person_annotation = self.ax_people.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
@@ -87,6 +89,11 @@ class Run(object):
                     arrowprops=dict(arrowstyle="->"))
         self.person_annotation.set_visible(False)
         self.people_highlight_data = self.ax_people.scatter([],[], marker='o', s=50, color='r')
+
+        x,y,w,h = self.ax_people.get_position().bounds
+        self.draw_event_button = Button(plt.axes([x,0.935,0.05,0.03]), 'Draw event')
+        self.draw_event_button.on_clicked(self.draw_event)
+        self.active_events = []
 
         self.update_plots()
         self.run()
@@ -108,31 +115,39 @@ class Run(object):
     def job_stats(self):
         return [self.population.job_stats[name] for name in self.population.job_stats]
 
-    def update(self, event):
+    def update(self, key):
         if self.updating:
             return 0
 
         self.updating = True
 
-        if event.key == 'r': #restart
+        if key.key == 'r': #restart
             plt.clf()
             self.__init__()
 
-        if event.key == 'i': #change amount of info in annotation box
+        if key.key == 'i': #change amount of info in annotation box
             self.annotations_verbose += 1
             if self.annotations_verbose > 3:
                 self.annotations_verbose = 0
 
-        if event.key in [' ']: #update
+        if key.key in [' ']: #update
             for t in range(self.time_step):
-                self.population.update()
+
+                for event in self.active_events:
+                    if event.duration > 0:
+                        self.population = event(self.population)
+                    else:
+                        self.population = event.terminate(self.population)
+                        self.active_events.remove(event)
                 self.time.append(len(self.time))
+                self.population.update()
+
                 for name in self.population.stats_names:
                     self.track_stats[name].append(self.population.stats[name])
 
-        if event.key in ['right','left']: #Tracking
+        if key.key in ['right','left']: #Tracking
             track_index = list(self.track_stats.keys()).index(self.tracking_name)
-            track_index = track_index+1 if event.key == 'right' else track_index-1
+            track_index = track_index+1 if key.key == 'right' else track_index-1
             track_index = np.clip(track_index, 0, len(self.track_stats)-1)
             self.tracking_name = list(self.track_stats.keys())[track_index]
             self.track_line.set_color(self.stats_colors[track_index])
@@ -329,7 +344,7 @@ class Run(object):
     def change_healthcare(self, healthcare):
         self.population.government.public_healthcare = healthcare
 
-    def open_job_options(self, event):
+    def open_job_options(self, _ ):
         self.job_options_window = plt.figure(figsize=(4,6))
         self.job_options_window.canvas.set_window_title('Jobs Options')
         self.textboxes = []
@@ -352,6 +367,12 @@ class Run(object):
             self.textboxes[-1].on_submit(changeJobOption(name, 'proportion'))
 
         plt.show()
+
+
+    def draw_event(self, _ ):
+        event = np.random.choice(events.EVENTS_POOL, p=events.EVENTS_PROB)()
+        self.active_events.append(event)
+        
 
 
 

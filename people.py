@@ -9,7 +9,6 @@ MAJORITY_AGE = 18
 MIN_WORKING_AGE = 14
 FOOD_PRICE = 5e3
 LOGEMENT_PRICE = 5e3
-NATALITY_RATE = 0.3
 LIFE_EXPECTANCY = 80
 MORTALITY_RATE = 0.1
 MENOPAUSE_AGE = 55
@@ -24,12 +23,14 @@ class Population(object):
             p.age = random.choice(range(20,80))
         self.stats_names = ['Population','Age','Money','Health', 'Happiness','Single males','Single females','Couples','Kids']
         self.food = n_start*5
+        self.food_decay = 0.2
+        self.natality_rate = 0.3
         self.update_status()
 
     def update(self):
         random.shuffle(self.persons)
         [p.update() for p in self]
-        self.food -= int(self.food*0.2) #food decay
+        self.food -= int(self.food*self.food_decay)
         self.government.update()
         self.update_status()
 
@@ -133,7 +134,7 @@ class Couple(object):
 
         nb_desired_kids = int(np.round((self.father.number_of_desired_kids + self.mother.number_of_desired_kids)/2))
         if self.mother.age <= MENOPAUSE_AGE and nb_desired_kids > 0:
-            if NATALITY_RATE > random.random() and self.money > 0:
+            if self.father.population.natality_rate > random.random() and self.money > 0:
                 baby = Person(self.father.population)
                 baby.name = baby.name.split(' ')[0] + ' ' + self.father.name.split(' ')[1]
                 baby.father = self.father
