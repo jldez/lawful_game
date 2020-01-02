@@ -7,6 +7,7 @@ import random
 import matplotlib.pyplot as plt
 from matplotlib.patches import *
 from matplotlib.widgets import *
+import textwrap
 
 
 COLORMAP = plt.cm.rainbow
@@ -14,8 +15,9 @@ COLORMAP_RANGE = (0.2,0.8)
 
 # FIXME : annotation box going outside window 
 # FIXME : retired people still has job_aspiration
+# FIXME : Handle closing the draw event window without choosing, or opening a 2nd draw, or updating while draw window is open
 
-class Run(object):
+class Game(object):
     def __init__(self):
 
         self.fig, self.axs = plt.subplots(figsize=(21,9), ncols=2, nrows=3)
@@ -96,7 +98,6 @@ class Run(object):
         self.active_events = []
 
         self.update_plots()
-        self.run()
 
 
     def run(self):
@@ -105,6 +106,7 @@ class Run(object):
         self.fig.canvas.mpl_connect('key_press_event', self.update)
         self.fig.canvas.mpl_connect('motion_notify_event', self.hover)
         self.fig.canvas.mpl_connect('button_press_event', self.click)
+        self.fig.canvas.mpl_connect('close_event', self.close)
         plt.show()
 
     
@@ -121,10 +123,6 @@ class Run(object):
 
         self.updating = True
 
-        if key.key == 'r': #restart
-            plt.clf()
-            self.__init__()
-
         if key.key == 'i': #change amount of info in annotation box
             self.annotations_verbose += 1
             if self.annotations_verbose > 3:
@@ -132,7 +130,7 @@ class Run(object):
 
         if key.key in [' ']: #update
             for t in range(self.time_step):
-
+            
                 for event in self.active_events:
                     if event.duration > 0:
                         self.population = event(self.population)
@@ -158,7 +156,9 @@ class Run(object):
 
     def update_plots(self):
 
-        self.resources_text.set_text('Money:' + self.format_money(self.population.government.money) + f' | Food:{self.population.food}')
+        self.resources_text.set_text('Money: ' + self.format_number(self.population.government.money) \
+                               + f' | Food: ' + self.format_number(self.population.food) \
+                               + f' | Science: ' + self.format_number(self.population.science))
 
         while len(self.stats_ax.texts) > 0:
             [txt.remove() for txt in self.stats_ax.texts]
@@ -198,7 +198,7 @@ class Run(object):
 
 
     @staticmethod
-    def format_money(money):
+    def format_number(money):
         if np.abs(money) >= 10e9:
             return str(int(money/1e9))+'G'
         elif np.abs(money) >= 10e6:
@@ -233,7 +233,7 @@ class Run(object):
                 if p.job is not None:
                     text += f'Job: {p.job.name} \n'
                     text += f'salary: {int(p.job.salary)} \n'
-                text += f'money: '+self.format_money(p.money)+' \n'
+                text += f'money: '+self.format_number(p.money)+' \n'
             if self.annotations_verbose > 2:
                 text += f'education: {p.education} \n'
                 text += f'experience: {p.experience} \n'
@@ -370,8 +370,27 @@ class Run(object):
 
 
     def draw_event(self, _ ):
-        event = np.random.choice(events.EVENTS_POOL, p=events.EVENTS_PROB)()
-        self.active_events.append(event)
+
+        self.draw_event_window = plt.figure(figsize=(8,4))
+        self.draw_event_window.canvas.set_window_title('Draw Event')
+        self.buttons = []
+
+        draws = np.random.choice(events.EVENTS_POOL, size=3, p=events.EVENTS_PROB)
+        draws = [draw() for draw in draws]
+
+        for i, draw in enumerate(draws):
+            lines, text = textwrap.wrap(draws[i].description, width=20), ''
+            for line in lines:
+                text += line + '\n'
+            self.buttons.append(Button(plt.axes([0.1+i*0.3,0.2,0.2,0.6]), text))
+            self.buttons[-1].on_clicked(chooseEvent(draw, self.active_events, self.draw_event_window))
+
+        plt.show()
+
+
+
+    def close(self, event):
+        plt.close('all')
         
 
 
@@ -387,8 +406,18 @@ class changeJobOption(object):
             jobs.JOBS[self.name][self.option] = int(event)
             jobs.JOBS[self.name]['max_salary'] = max([jobs.JOBS[self.name]['base_salary'],jobs.JOBS[self.name]['max_salary']])
 
+class chooseEvent(object):
+    def __init__(self, draw, active_events, window):
+        self.draw = draw
+        self.active_events = active_events
+        self.window = window
+    def __call__(self, event):
+        self.active_events.append(self.draw)
+        plt.close(self.window)
+
     
 
 
 if __name__ == '__main__':
-    run = Run()
+    game = Game()
+    game.run()

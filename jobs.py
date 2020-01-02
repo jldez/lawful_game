@@ -58,21 +58,35 @@ class Job(object):
 
 
 class Farmer(Job):
+    """Produces food"""
     def __init__(self, person):
         self.name = 'Farmer'
         self.domain = 'farming'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
     def update(self):
         super(Farmer, self).update()
-        self.person.population.food += 10 + min(self.person.experience[self.domain],10)
+        self.person.population.food += 10 + min(self.person.experience[self.domain],5)
 
 class Cook(Job):
+    """Less wasted food (decay)"""
     def __init__(self, person):
         self.name = 'Cook'
         self.domain = 'cooking'
+        self.min_fraction = 0.3
+        self.max_fraction = 0.6
+        self.max_amount = 10
         super().__init__(person, salary=JOBS[self.name]['base_salary'], promotion_name='Chef')
+    def update(self):
+        super(Cook, self).update()
+        fraction = self.min_fraction + (self.max_fraction-self.min_fraction) \
+            *np.clip(3*self.person.population.job_stats['Chef']/(self.person.population.job_stats['Cook']+1e-9), 0, 1)
+        saved_food = int(min([self.max_amount, \
+            self.person.population.food*self.person.population.food_decay/(self.person.population.job_stats['Cook']+1e-9)*fraction]))
+        self.person.population.food += saved_food
         
 class Chef(Job):
+    """Make cooks better"""
+    #todo : chef should work as professors for scientists
     def __init__(self, person):
         self.name = 'Chef'
         self.domain = 'cooking'
@@ -91,18 +105,35 @@ class Journalist(Job):
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Scientist(Job):
+    """Generate science points"""
     def __init__(self, person):
         self.name = 'Scientist'
         self.domain = 'science'
+        self.science_generation = 1
+        self.has_professor = False
         super().__init__(person, salary=JOBS[self.name]['base_salary'], promotion_name='Professor')
+    def update(self):
+        super(Scientist, self).update()
+        self.person.population.science += self.science_generation
+        if self.has_professor:
+            self.person.population.science += self.science_generation
+        self.has_professor = False
 
 class Professor(Job):
+    """Make scientists better"""
     def __init__(self, person):
         self.name = 'Professor'
         self.domain = 'science'
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
+    def update(self):
+        super(Professor, self).update()
+        if len(self.person.population.workers['Scientist']) > 0:
+            for scientist in np.random.choice(self.person.population.workers['Scientist'], size=3):
+                try: scientist.job.has_professor = True
+                except: pass
 
 class Teacher(Job):
+    """Better education or something"""
     def __init__(self, person):
         self.name = 'Teacher'
         self.domain = 'teaching'
@@ -121,6 +152,7 @@ class Judge(Job):
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class HealthJob(Job):
+    """Heal population"""
     def update(self):
         super(HealthJob, self).update()
         for k in range(5):
@@ -152,6 +184,7 @@ class Surgeon(HealthJob):
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Builder(Job):
+    """Make buildings"""
     def __init__(self, person):
         self.name = 'Builder'
         self.domain = 'construction'
@@ -165,6 +198,7 @@ class Builder(Job):
         super(Builder, self).update()
 
 class Architect(Job):
+    """Make builders construct better houses"""
     def __init__(self, person):
         self.name = 'Architect'
         self.domain = 'engineering'
@@ -177,6 +211,7 @@ class Cashier(Job):
         super().__init__(person, salary=JOBS[self.name]['base_salary'])
 
 class Deputee(Job):
+    """Generate action points?"""
     def __init__(self, person):
         self.name = 'Deputee'
         self.domain = 'politics'
@@ -186,6 +221,7 @@ class Deputee(Job):
         super(Deputee, self).update()
 
 class Minister(Job):
+    """Generate action points?"""
     def __init__(self, person):
         self.name = 'Minister'
         self.domain = 'politics'

@@ -24,6 +24,7 @@ class Population(object):
         self.stats_names = ['Population','Age','Money','Health', 'Happiness','Single males','Single females','Couples','Kids']
         self.food = n_start*5
         self.food_decay = 0.2
+        self.science = 0
         self.natality_rate = 0.3
         self.update_status()
 
